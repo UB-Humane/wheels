@@ -42,7 +42,7 @@ class BikeRequestsController < ApplicationController
   def handle_production_update
     attributes = case params[:status]
     when "approve"      then { status: :requested }
-    when "deny"         then { status: :denied }
+    when "deny"         then { status: :denied, denial_reason: params[:denial_reason].presence }
     when "completed"    then { status: :completed }
     when "delivered"    then { status: :delivered }
     when "distributed"  then { status: :distributed }
@@ -64,7 +64,7 @@ class BikeRequestsController < ApplicationController
   end
 
   def handle_distribution_resubmit
-    if @bike_request.update(resubmit_params.merge(status: :pending))
+    if @bike_request.update(resubmit_params.merge(status: :pending, denial_reason: nil))
       redirect_to tickets_distribution_path(@bike_request.distribution, tab: "pending")
     else
       render :edit, status: :unprocessable_entity
