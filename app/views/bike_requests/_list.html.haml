@@ -94,7 +94,7 @@
               = button_to "Approve", bike_request_path(req), method: :patch, params: { status: "approve" },
                   class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
               = button_to "Deny", bike_request_path(req), method: :patch, params: { status: "deny" },
-                  class: "px-4 py-2 text-lg font-medium text-red-700 underline bg-transparent border-0 cursor-pointer"
+                  class: "px-6 py-3 text-lg font-bold text-white bg-red-700 hover:bg-red-600 cursor-pointer transition-colors border-0"
             - elsif req.completed?
               = button_to "Mark Delivered", bike_request_path(req), method: :patch, params: { status: "delivered" },
                   class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
