@@ -55,6 +55,8 @@
             %p.text-lg.text-gray-500= req.requestor_name
             %p.text-lg.text-gray-600= req.phone
           .text-right.shrink-0.space-y-1
+            - if req.denied?
+              %p.text-2xl.font-bold.text-red-600 DENIED
             %p.text-lg.font-medium.text-gray-900 Due #{req.due_date.strftime("%-m/%-d/%Y")}
 
         .overflow-x-auto

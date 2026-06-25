@@ -9,8 +9,10 @@ class DistributionsController < ApplicationController
 
   def tickets
     @tab = params[:tab].presence_in(%w[pending requested completed delivered distributed]) || "pending"
-    @tab_counts = @distribution.bike_requests.group(:status).count
-    scope = @distribution.bike_requests.where(status: @tab)
+    raw_counts = @distribution.bike_requests.group(:status).count
+    @tab_counts = raw_counts.merge("pending" => (raw_counts["pending"] || 0) + (raw_counts["denied"] || 0))
+    status_scope = @tab == "pending" ? %w[pending denied] : @tab
+    scope = @distribution.bike_requests.where(status: status_scope)
                                 .includes(:distribution, :user, :bikes)
                                 .order(due_date: :asc)
     @pagy, @bike_requests = pagy(scope, limit: 20)
