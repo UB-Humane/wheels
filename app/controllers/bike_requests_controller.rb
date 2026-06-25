@@ -51,7 +51,11 @@ class BikeRequestsController < ApplicationController
     original_status = @bike_request.status
 
     if attributes && @bike_request.update(attributes)
-      tab = params[:status] == "approve" ? "requested" : @bike_request.status.to_s
+      tab = case params[:status]
+            when "approve" then "requested"
+            when "deny"    then "pending"
+            else @bike_request.status.to_s
+            end
       redirect_to tickets_production_path(@bike_request.production, tab: tab)
     else
       redirect_to tickets_production_path(@bike_request.production, tab: original_status),

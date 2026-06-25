@@ -147,7 +147,7 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
   test "update deny redirects to production pending tab" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch bike_request_path(bike_requests(:pending_bike)), params: { status: "deny" }
-    assert_redirected_to tickets_production_path(productions(:main_production), tab: "denied")
+    assert_redirected_to tickets_production_path(productions(:main_production), tab: "pending")
   end
 
   test "update delivered sets status to delivered" do
