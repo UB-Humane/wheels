@@ -196,6 +196,37 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to tickets_production_path(productions(:main_production), tab: "delivered")
   end
 
+  # --- complete_all ---
+
+  test "complete_all requires authentication" do
+    patch complete_all_bike_request_path(bike_requests(:requested_bike))
+    assert_redirected_to login_path
+  end
+
+  test "complete_all returns 403 for user without production access" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    patch complete_all_bike_request_path(bike_requests(:requested_bike))
+    assert_response :forbidden
+  end
+
+  test "complete_all marks all bikes as completed" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch complete_all_bike_request_path(bike_requests(:requested_bike))
+    assert bike_requests(:requested_bike).bikes.reload.all?(&:completed?)
+  end
+
+  test "complete_all sets request status to completed" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch complete_all_bike_request_path(bike_requests(:requested_bike))
+    assert bike_requests(:requested_bike).reload.completed?
+  end
+
+  test "complete_all redirects to production completed tab" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch complete_all_bike_request_path(bike_requests(:requested_bike))
+    assert_redirected_to tickets_production_path(productions(:main_production), tab: "completed")
+  end
+
   # --- update: distribution resubmit ---
 
   test "resubmit requires authentication" do

@@ -17,7 +17,9 @@ Rails.application.routes.draw do
     resources :users,         only: [ :index, :new, :create, :edit, :update, :destroy ]
   end
 
-  resources :bike_requests,  only: [ :edit, :update ]
+  resources :bike_requests,  only: [ :edit, :update ] do
+    patch :complete_all, on: :member
+  end
   resources :bikes,          only: [ :update ]
   resources :productions,    only: [ :show ] do
     get :tickets, on: :member

@@ -1,7 +1,7 @@
 class BikeRequestsController < ApplicationController
   before_action :set_distribution, only: [ :new, :create ]
   before_action :check_distribution_access, only: [ :new, :create ]
-  before_action :set_bike_request, only: [ :edit, :update ]
+  before_action :set_bike_request, only: [ :edit, :update, :complete_all ]
 
   def new
     @bike_request = BikeRequest.new(due_date: Date.today + 14)
@@ -25,6 +25,13 @@ class BikeRequestsController < ApplicationController
 
   def edit
     return render plain: "Access denied", status: :forbidden unless authorized_for_distribution?
+  end
+
+  def complete_all
+    return render plain: "Access denied", status: :forbidden unless authorized_for_production?
+    @bike_request.bikes.update_all(completed: true)
+    @bike_request.update_columns(status: BikeRequest.statuses[:completed]) if @bike_request.requested?
+    redirect_to tickets_production_path(@bike_request.production, tab: "completed")
   end
 
   def update
