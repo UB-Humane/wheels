@@ -24,24 +24,24 @@ class DistributionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "show defaults to pending tab" do
+  test "show defaults to requested tab" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
     get tickets_distribution_path(distributions(:downtown_dist))
-    assert_equal "pending", assigns(:tab)
+    assert_equal "requested", assigns(:tab)
   end
 
-  test "pending tab includes denied cards" do
+  test "requested tab includes denied cards" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
-    get tickets_distribution_path(distributions(:downtown_dist)), params: { tab: "pending" }
+    get tickets_distribution_path(distributions(:downtown_dist)), params: { tab: "requested" }
     assert_includes assigns(:bike_requests), bike_requests(:denied_bike)
-    assert_includes assigns(:bike_requests), bike_requests(:pending_bike)
+    assert_includes assigns(:bike_requests), bike_requests(:requested_bike)
   end
 
-  test "pending tab count includes denied cards" do
+  test "requested tab count includes denied cards" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
-    get tickets_distribution_path(distributions(:downtown_dist)), params: { tab: "pending" }
-    expected = BikeRequest.where(distribution: distributions(:downtown_dist), status: %w[pending denied]).count
-    assert_equal expected, assigns(:tab_counts)["pending"]
+    get tickets_distribution_path(distributions(:downtown_dist)), params: { tab: "requested" }
+    expected = BikeRequest.where(distribution: distributions(:downtown_dist), status: %w[requested denied]).count
+    assert_equal expected, assigns(:tab_counts)["requested"]
   end
 
   test "show accepts valid tab parameter" do

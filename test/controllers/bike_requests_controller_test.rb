@@ -50,11 +50,11 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to tickets_distribution_path(distributions(:downtown_dist))
   end
 
-  test "create sets status to pending" do
+  test "create sets status to requested" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
     post distribution_bike_requests_path(distributions(:downtown_dist)),
          params: { bike_request: valid_bike_request_params }
-    assert BikeRequest.last.pending?
+    assert BikeRequest.last.requested?
   end
 
   test "create saves nested bikes" do
@@ -91,19 +91,19 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
   # --- edit ---
 
   test "edit requires authentication" do
-    get edit_bike_request_path(bike_requests(:pending_bike))
+    get edit_bike_request_path(bike_requests(:requested_bike))
     assert_redirected_to login_path
   end
 
   test "edit returns 403 for user without distribution access" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    get edit_bike_request_path(bike_requests(:pending_bike))
+    get edit_bike_request_path(bike_requests(:requested_bike))
     assert_response :forbidden
   end
 
-  test "edit renders form for authorized distribution user on pending card" do
+  test "edit renders form for authorized distribution user on requested card" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
-    get edit_bike_request_path(bike_requests(:pending_bike))
+    get edit_bike_request_path(bike_requests(:requested_bike))
     assert_response :success
   end
 
@@ -116,38 +116,38 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
   # --- update: production approve/deny ---
 
   test "update approve requires authentication" do
-    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "approve" }
+    patch bike_request_path(bike_requests(:requested_bike)), params: { status: "approve" }
     assert_redirected_to login_path
   end
 
   test "update approve returns 403 for user without production access" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
-    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "approve" }
+    patch bike_request_path(bike_requests(:requested_bike)), params: { status: "approve" }
     assert_response :forbidden
   end
 
-  test "update approve sets status to requested" do
+  test "update approve sets status to pending" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "approve" }
-    assert bike_requests(:pending_bike).reload.requested?
+    patch bike_request_path(bike_requests(:requested_bike)), params: { status: "approve" }
+    assert bike_requests(:requested_bike).reload.pending?
   end
 
-  test "update approve redirects to production requested tab" do
+  test "update approve redirects to production pending tab" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "approve" }
-    assert_redirected_to tickets_production_path(productions(:main_production), tab: "requested")
+    patch bike_request_path(bike_requests(:requested_bike)), params: { status: "approve" }
+    assert_redirected_to tickets_production_path(productions(:main_production), tab: "pending")
   end
 
   test "update deny sets status to denied" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "deny" }
-    assert bike_requests(:pending_bike).reload.denied?
+    patch bike_request_path(bike_requests(:requested_bike)), params: { status: "deny" }
+    assert bike_requests(:requested_bike).reload.denied?
   end
 
-  test "update deny redirects to production pending tab" do
+  test "update deny redirects to production requested tab" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "deny" }
-    assert_redirected_to tickets_production_path(productions(:main_production), tab: "pending")
+    patch bike_request_path(bike_requests(:requested_bike)), params: { status: "deny" }
+    assert_redirected_to tickets_production_path(productions(:main_production), tab: "requested")
   end
 
   test "update delivered sets status to delivered" do
@@ -164,8 +164,8 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
 
   test "update completed sets status to completed" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    patch bike_request_path(bike_requests(:requested_bike)), params: { status: "completed" }
-    assert bike_requests(:requested_bike).reload.completed?
+    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "completed" }
+    assert bike_requests(:pending_bike).reload.completed?
   end
 
   test "update delivered from completed sets status to delivered" do
@@ -199,31 +199,31 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
   # --- complete_all ---
 
   test "complete_all requires authentication" do
-    patch complete_all_bike_request_path(bike_requests(:requested_bike))
+    patch complete_all_bike_request_path(bike_requests(:pending_bike))
     assert_redirected_to login_path
   end
 
   test "complete_all returns 403 for user without production access" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
-    patch complete_all_bike_request_path(bike_requests(:requested_bike))
+    patch complete_all_bike_request_path(bike_requests(:pending_bike))
     assert_response :forbidden
   end
 
   test "complete_all marks all bikes as completed" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    patch complete_all_bike_request_path(bike_requests(:requested_bike))
-    assert bike_requests(:requested_bike).bikes.reload.all?(&:completed?)
+    patch complete_all_bike_request_path(bike_requests(:pending_bike))
+    assert bike_requests(:pending_bike).bikes.reload.all?(&:completed?)
   end
 
   test "complete_all sets request status to completed" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    patch complete_all_bike_request_path(bike_requests(:requested_bike))
-    assert bike_requests(:requested_bike).reload.completed?
+    patch complete_all_bike_request_path(bike_requests(:pending_bike))
+    assert bike_requests(:pending_bike).reload.completed?
   end
 
   test "complete_all redirects to production completed tab" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    patch complete_all_bike_request_path(bike_requests(:requested_bike))
+    patch complete_all_bike_request_path(bike_requests(:pending_bike))
     assert_redirected_to tickets_production_path(productions(:main_production), tab: "completed")
   end
 
@@ -242,11 +242,11 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
-  test "resubmit sets status to pending" do
+  test "resubmit sets status to requested" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
     patch bike_request_path(bike_requests(:denied_bike)),
           params: { bike_request: resubmit_params }
-    assert bike_requests(:denied_bike).reload.pending?
+    assert bike_requests(:denied_bike).reload.requested?
   end
 
   test "resubmit updates bike request fields" do
@@ -256,18 +256,18 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Updated Name", bike_requests(:denied_bike).reload.requestor_name
   end
 
-  test "resubmit redirects to distribution pending tab" do
+  test "resubmit redirects to distribution requested tab" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
     patch bike_request_path(bike_requests(:denied_bike)),
           params: { bike_request: resubmit_params }
-    assert_redirected_to tickets_distribution_path(distributions(:downtown_dist), tab: "pending")
+    assert_redirected_to tickets_distribution_path(distributions(:downtown_dist), tab: "requested")
   end
 
-  test "resubmit on pending card also sets pending" do
+  test "resubmit on requested card also sets requested" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
-    patch bike_request_path(bike_requests(:pending_bike)),
+    patch bike_request_path(bike_requests(:requested_bike)),
           params: { bike_request: resubmit_params }
-    assert bike_requests(:pending_bike).reload.pending?
+    assert bike_requests(:requested_bike).reload.requested?
   end
 
   private

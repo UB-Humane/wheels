@@ -24,7 +24,7 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "show defaults to requested tab" do
+  test "show defaults to pending tab" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     get tickets_production_path(productions(:main_production))
     assert_response :success
@@ -36,7 +36,7 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "show ignores invalid tab parameter and defaults to requested" do
+  test "show ignores invalid tab parameter and defaults to pending" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     get tickets_production_path(productions(:main_production)), params: { tab: "badtab" }
     assert_response :success

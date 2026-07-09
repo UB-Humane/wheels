@@ -30,7 +30,7 @@ class BikeRequestsController < ApplicationController
   def complete_all
     return render plain: "Access denied", status: :forbidden unless authorized_for_production?
     @bike_request.bikes.update_all(completed: true)
-    @bike_request.update_columns(status: BikeRequest.statuses[:completed]) if @bike_request.requested?
+    @bike_request.update_columns(status: BikeRequest.statuses[:completed]) if @bike_request.pending?
     redirect_to tickets_production_path(@bike_request.production, tab: "completed")
   end
 
@@ -48,7 +48,7 @@ class BikeRequestsController < ApplicationController
 
   def handle_production_update
     attributes = case params[:status]
-    when "approve"      then { status: :requested }
+    when "approve"      then { status: :pending }
     when "deny"         then { status: :denied, denial_reason: params[:denial_reason].presence }
     when "completed"    then { status: :completed }
     when "delivered"    then { status: :delivered }
@@ -59,8 +59,8 @@ class BikeRequestsController < ApplicationController
 
     if attributes && @bike_request.update(attributes)
       tab = case params[:status]
-            when "approve" then "requested"
-            when "deny"    then "pending"
+            when "approve" then "pending"
+            when "deny"    then "requested"
             else @bike_request.status.to_s
             end
       redirect_to tickets_production_path(@bike_request.production, tab: tab)
@@ -71,8 +71,8 @@ class BikeRequestsController < ApplicationController
   end
 
   def handle_distribution_resubmit
-    if @bike_request.update(resubmit_params.merge(status: :pending, denial_reason: nil))
-      redirect_to tickets_distribution_path(@bike_request.distribution, tab: "pending")
+    if @bike_request.update(resubmit_params.merge(status: :requested, denial_reason: nil))
+      redirect_to tickets_distribution_path(@bike_request.distribution, tab: "requested")
     else
       render :edit, status: :unprocessable_entity
     end

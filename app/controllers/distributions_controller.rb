@@ -8,10 +8,10 @@ class DistributionsController < ApplicationController
   end
 
   def tickets
-    @tab = params[:tab].presence_in(%w[pending requested completed delivered distributed]) || "pending"
+    @tab = params[:tab].presence_in(%w[requested pending completed delivered distributed]) || "requested"
     raw_counts = @distribution.bike_requests.group(:status).count
-    @tab_counts = raw_counts.merge("pending" => (raw_counts["pending"] || 0) + (raw_counts["denied"] || 0))
-    status_scope = @tab == "pending" ? %w[pending denied] : @tab
+    @tab_counts = raw_counts.merge("requested" => (raw_counts["requested"] || 0) + (raw_counts["denied"] || 0))
+    status_scope = @tab == "requested" ? %w[requested denied] : @tab
     scope = @distribution.bike_requests.where(status: status_scope)
                                 .includes(:distribution, :user, :bikes)
                                 .order(due_date: :asc)
