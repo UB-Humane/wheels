@@ -33,3 +33,13 @@ denied_bike:
   distribution: downtown_dist
   production: main_production
   user: dist_user
+
+archived_bike:
+  phone: "5555550033"
+  requestor_name: Eve Garcia
+  due_date: <%= 25.days.from_now.to_date %>
+  status: 6
+  status_before_archival: 0
+  distribution: downtown_dist
+  production: main_production
+  user: dist_user

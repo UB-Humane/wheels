@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_25_220233) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_012950) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -24,6 +24,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_25_220233) do
     t.bigint "production_id", null: false
     t.string "requestor_name", null: false
     t.integer "status", default: 1, null: false
+    t.integer "status_before_archival"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["distribution_id"], name: "index_bike_requests_on_distribution_id"

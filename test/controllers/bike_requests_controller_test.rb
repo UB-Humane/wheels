@@ -196,6 +196,55 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to tickets_production_path(productions(:main_production), tab: "delivered")
   end
 
+  # --- archive / unarchive ---
+
+  test "archive requires authentication" do
+    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "archive" }
+    assert_redirected_to login_path
+  end
+
+  test "archive returns 403 for distribution user" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "archive" }
+    assert_response :forbidden
+  end
+
+  test "archive sets status to archived" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "archive" }
+    assert bike_requests(:pending_bike).reload.archived?
+  end
+
+  test "archive stores status before archival" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "archive" }
+    assert_equal BikeRequest.statuses[:pending], bike_requests(:pending_bike).reload.status_before_archival
+  end
+
+  test "archive redirects to production archived tab" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "archive" }
+    assert_redirected_to tickets_production_path(productions(:main_production), tab: "archived")
+  end
+
+  test "unarchive restores previous status" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:archived_bike)), params: { status: "unarchive" }
+    assert bike_requests(:archived_bike).reload.pending?
+  end
+
+  test "unarchive clears status_before_archival" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:archived_bike)), params: { status: "unarchive" }
+    assert_nil bike_requests(:archived_bike).reload.status_before_archival
+  end
+
+  test "unarchive redirects to restored status tab" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:archived_bike)), params: { status: "unarchive" }
+    assert_redirected_to tickets_production_path(productions(:main_production), tab: "pending")
+  end
+
   # --- complete_all ---
 
   test "complete_all requires authentication" do
