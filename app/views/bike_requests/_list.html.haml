@@ -1,16 +1,21 @@
 :javascript
-  function printBikeLabel(name, type, age, height, notes, requestor, phone, due) {
-    var lines = [];
-    if (name) lines.push('<p style="font-size:18pt;font-weight:bold;margin:0">' + name + '</p>');
-    var detail = type;
-    if (age) detail += ' &middot; Age ' + age;
-    if (height) detail += ' &middot; ' + height;
-    lines.push('<p style="font-size:14pt;margin:4px 0">' + detail + '</p>');
-    if (notes) lines.push('<p style="font-size:12pt;margin:4px 0">' + notes + '</p>');
-    lines.push('<p style="font-size:11pt;color:#555;margin:8px 0 0">' + requestor + ' &middot; ' + phone + '</p>');
-    lines.push('<p style="font-size:11pt;color:#555;margin:2px 0">Due ' + due + '</p>');
-    var win = window.open('', '_blank', 'width=400,height=300');
-    win.document.write('<html><body style="font-family:sans-serif;padding:12px">' + lines.join('') + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>');
+  function printAllBikeLabels(bikes, requestor, phone, due) {
+    var pages = [];
+    bikes.forEach(function(b) {
+      var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4];
+      var lines = [];
+      if (name) lines.push('<p style="font-size:18pt;font-weight:bold;margin:0">' + name + '</p>');
+      var detail = type;
+      if (age) detail += ' &middot; Age ' + age;
+      if (height) detail += ' &middot; ' + height;
+      lines.push('<p style="font-size:14pt;margin:4px 0">' + detail + '</p>');
+      if (notes) lines.push('<p style="font-size:12pt;margin:4px 0">' + notes + '</p>');
+      lines.push('<p style="font-size:11pt;color:#555;margin:8px 0 0">' + requestor + ' &middot; ' + phone + '</p>');
+      lines.push('<p style="font-size:11pt;color:#555;margin:2px 0">Due ' + due + '</p>');
+      pages.push('<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') + 'padding:12px">' + lines.join('') + '</div>');
+    });
+    var win = window.open('', '_blank', 'width=400,height=600');
+    win.document.write('<html><body style="font-family:sans-serif;margin:0">' + pages.join('') + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>');
     win.document.close();
   }
   function printCard(bikes, requestor, phone, due) {
@@ -72,7 +77,6 @@
                 %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-700 Notes
                 - if production_view && !req.pending?
                   %th
-                %th
             %tbody
               - req.bikes.each do |bike|
                 %tr.border-b.border-gray-200
@@ -89,8 +93,7 @@
                       - else
                         = button_to "Done", bike_path(bike), method: :patch,
                             class: "px-3 py-1 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
-                  %td.px-3.py-2
-                    %button.px-3.py-1.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer{type: "button", onclick: "printBikeLabel(#{(bike.label_data + [req.requestor_name, req.phone, req.due_date.strftime('%-m/%-d/%Y')]).map(&:to_json).join(',')})"} Print
+
 
         .flex.gap-4.mt-2
           - if production_view
@@ -119,7 +122,8 @@
             - if req.pending? || req.denied?
               = link_to "Edit", edit_bike_request_path(req), class: "px-4 py-2 text-lg font-medium text-gray-900 underline"
           - if production_view && !req.pending?
-            %button.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer.self-center{type: "button", onclick: "printCard(#{req.bikes_label_data.to_json}, #{req.requestor_name.to_json}, #{req.phone.to_json}, #{req.due_date.strftime('%-m/%-d/%Y').to_json})"} Print
+            %button.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer.self-center{type: "button", onclick: "printAllBikeLabels(#{req.bikes_label_data.to_json}, #{req.requestor_name.to_json}, #{req.phone.to_json}, #{req.due_date.strftime('%-m/%-d/%Y').to_json})"} Print All
+            %button.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer.self-center{type: "button", onclick: "printCard(#{req.bikes_label_data.to_json}, #{req.requestor_name.to_json}, #{req.phone.to_json}, #{req.due_date.strftime('%-m/%-d/%Y').to_json})"} Print Overview
 
   - if pagy.pages > 1
     .flex.items-center.gap-6.mt-8.text-lg
