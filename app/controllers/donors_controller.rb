@@ -5,9 +5,17 @@ class DonorsController < ApplicationController
   before_action :set_donor, only: [ :edit, :update ]
 
   def index
-    scope = params[:archived] == "true" ? @production.donors.archived : @production.donors.active
-    @pagy, @donors = pagy(scope.order(:last_name, :first_name), limit: 20)
     @showing_archived = params[:archived] == "true"
+    @query = params[:query].presence
+    scope = @showing_archived ? @production.donors.archived : @production.donors.active
+    if @query
+      q = "%#{@query}%"
+      scope = scope.where(
+        "first_name ILIKE :q OR last_name ILIKE :q OR email ILIKE :q OR (first_name || ' ' || last_name) ILIKE :q",
+        q: q
+      )
+    end
+    @pagy, @donors = pagy(scope.order(:last_name, :first_name), limit: 20)
   end
 
   def new

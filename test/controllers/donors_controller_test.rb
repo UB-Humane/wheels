@@ -46,6 +46,37 @@ class DonorsControllerTest < ActionDispatch::IntegrationTest
     assert_not_includes assigns(:donors), donors(:active_donor)
   end
 
+  test "index search by first name finds donor" do
+    login_as_prod_admin
+    get production_donors_path(production, query: "Jane")
+    assert_includes assigns(:donors), donors(:active_donor)
+    assert_not_includes assigns(:donors), donors(:minimal_donor)
+  end
+
+  test "index search by full name finds donor" do
+    login_as_prod_admin
+    get production_donors_path(production, query: "Jane Doe")
+    assert_includes assigns(:donors), donors(:active_donor)
+  end
+
+  test "index search by email finds donor" do
+    login_as_prod_admin
+    get production_donors_path(production, query: "jane@example.com")
+    assert_includes assigns(:donors), donors(:active_donor)
+  end
+
+  test "index search is case-insensitive" do
+    login_as_prod_admin
+    get production_donors_path(production, query: "JANE")
+    assert_includes assigns(:donors), donors(:active_donor)
+  end
+
+  test "index search with no match returns empty list" do
+    login_as_prod_admin
+    get production_donors_path(production, query: "zzznomatch")
+    assert_empty assigns(:donors)
+  end
+
   # --- new ---
 
   test "new requires authentication" do
