@@ -61,6 +61,33 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_not assigns(:bike_requests).include?(other_request)
   end
 
+  # --- inventory action ---
+
+  test "inventory requires authentication" do
+    get inventory_production_path(productions(:main_production))
+    assert_redirected_to login_path
+  end
+
+  test "inventory returns 403 for distribution user" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    get inventory_production_path(productions(:main_production))
+    assert_response :forbidden
+  end
+
+  test "inventory renders for production user" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get inventory_production_path(productions(:main_production))
+    assert_response :success
+  end
+
+  test "inventory creates inventory record if none exists" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    productions(:main_production).inventory&.destroy
+    assert_difference "ProductionInventory.count", 1 do
+      get inventory_production_path(productions(:main_production))
+    end
+  end
+
   # --- users action ---
 
   test "users requires authentication" do

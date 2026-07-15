@@ -1,0 +1,4 @@
+main_inventory:
+  production: main_production
+  helmets: 10
+  locks: 5

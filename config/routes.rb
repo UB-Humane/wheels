@@ -22,10 +22,12 @@ Rails.application.routes.draw do
   end
   resources :bikes,          only: [ :update ]
   resources :productions,    only: [ :show ] do
-    get :tickets, on: :member
-    get :users,   on: :member
+    get :tickets,   on: :member
+    get :users,     on: :member
+    get :inventory, on: :member
     resources :user_productions, only: [ :create, :update, :destroy ]
   end
+  resources :production_inventories, only: [ :update ]
   resources :distributions,  only: [ :show ] do
     get :tickets, on: :member
     get :users,   on: :member

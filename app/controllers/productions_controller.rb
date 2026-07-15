@@ -16,6 +16,10 @@ class ProductionsController < ApplicationController
     @pagy, @bike_requests = pagy(scope, limit: 20)
   end
 
+  def inventory
+    @inventory = @production.inventory || @production.create_inventory!
+  end
+
   def users
     render plain: "Access denied", status: :forbidden and return unless @location_admin
     members_scope = @production.user_productions.includes(:user).order("users.name")
@@ -42,6 +46,7 @@ class ProductionsController < ApplicationController
     @location_path         = tickets_production_path(@production)
     @location_admin        = production_admin?(@production)
     @location_users_path   = users_production_path(@production)
-    @location_show_tickets = true
+    @location_inventory_path = inventory_production_path(@production)
+    @location_show_tickets   = true
   end
 end
