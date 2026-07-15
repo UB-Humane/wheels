@@ -1,0 +1,47 @@
+- content_for :title, @showing_archived ? "Archived Donors" : "Donors"
+
+.flex.items-center.justify-between.mb-8
+  %h1.text-3xl.font-bold.text-gray-900= @showing_archived ? "Archived Donors" : "Donors"
+  .flex.items-center.gap-4
+    - if @showing_archived
+      = link_to "Active Donors", production_donors_path(@production), class: "px-4 py-2 text-lg font-medium text-gray-900 underline"
+    - else
+      = link_to "Add", new_production_donor_path(@production), class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 transition-colors"
+      = link_to "Archived", production_donors_path(@production, archived: true), class: "px-4 py-2 text-lg font-medium text-gray-900 underline"
+
+- if @donors.any?
+  .space-y-2
+    - @donors.each do |donor|
+      .flex.items-start.justify-between.px-6.py-5.border-2.border-gray-900
+        .space-y-1
+          %p.text-2xl.font-bold.text-gray-900= donor.full_name
+          - if donor.email.present?
+            %p.text-lg.text-gray-500= donor.email
+          - if donor.mobile.present?
+            %p.text-lg.text-gray-500= donor.mobile
+          - if donor.address.present?
+            %p.text-lg.text-gray-600= donor.address
+        .flex.items-center.gap-4.shrink-0
+          = link_to "Edit", edit_production_donor_path(@production, donor), class: "px-4 py-2 text-lg font-medium text-gray-900 underline"
+          - if @showing_archived
+            = button_to "Unarchive", production_donor_path(@production, donor), method: :patch,
+                params: { unarchive: true },
+                class: "px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
+          - else
+            = button_to "Archive", production_donor_path(@production, donor), method: :patch,
+                params: { archive: true },
+                class: "px-4 py-2 text-lg font-medium text-gray-500 underline bg-transparent border-0 cursor-pointer"
+- else
+  %p.text-xl.text-gray-500= @showing_archived ? "No archived donors." : "No donors yet."
+
+- if @pagy.pages > 1
+  .flex.items-center.gap-6.mt-8.text-lg
+    - if @pagy.prev
+      = link_to "← Previous", production_donors_path(@production, archived: @showing_archived, page: @pagy.prev), class: "font-medium text-gray-900 underline"
+    - else
+      %span.text-gray-400 ← Previous
+    %span.text-gray-600= "Page #{@pagy.page} of #{@pagy.pages}"
+    - if @pagy.next
+      = link_to "Next →", production_donors_path(@production, archived: @showing_archived, page: @pagy.next), class: "font-medium text-gray-900 underline"
+    - else
+      %span.text-gray-400 Next →

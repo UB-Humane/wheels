@@ -8,6 +8,7 @@ class DistributionsController < ApplicationController
   end
 
   def tickets
+    @location_active = :tickets
     @tab = params[:tab].presence_in(%w[requested pending completed delivered distributed archived]) || "requested"
     raw_counts = @distribution.bike_requests.group(:status).count
     @tab_counts = raw_counts.merge("requested" => (raw_counts["requested"] || 0) + (raw_counts["denied"] || 0))
@@ -19,6 +20,7 @@ class DistributionsController < ApplicationController
   end
 
   def users
+    @location_active = :users
     render plain: "Access denied", status: :forbidden and return unless @location_admin
     members_scope = @distribution.user_distributions.includes(:user).order("users.name")
     @pagy_members, @members = pagy(members_scope, limit: 20)

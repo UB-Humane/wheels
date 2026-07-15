@@ -1,0 +1,4 @@
+- content_for :title, "Edit Donor"
+%h1.text-3xl.font-bold.text-gray-900.mb-8= "Edit #{@donor.full_name}"
+
+= render "form", donor: @donor

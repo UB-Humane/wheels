@@ -1,0 +1,21 @@
+active_donor:
+  production: main_production
+  first_name: Jane
+  last_name: Doe
+  email: jane@example.com
+  mobile: "5550001111"
+  address: "123 Main St"
+  archived: false
+
+minimal_donor:
+  production: main_production
+  first_name: Bob
+  last_name: Smith
+  archived: false
+
+archived_donor:
+  production: main_production
+  first_name: Eve
+  last_name: Garcia
+  email: eve@example.com
+  archived: true

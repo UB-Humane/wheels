@@ -27,17 +27,17 @@
             .w-px.h-6.bg-gray-400.mx-1
             %span.px-3.text-lg.font-semibold.text-gray-900= @location_name
             - if @location_show_tickets
-              - tickets_active = !request.path.end_with?("/users") && !request.path.end_with?("/inventory")
               = link_to "Bike Tickets", @location_path,
-                  class: "ml-2 px-4 py-2 text-lg font-medium #{tickets_active ? 'bg-gray-900 text-white' : 'text-gray-900'}"
+                  class: "ml-2 px-4 py-2 text-lg font-medium #{@location_active == :tickets ? 'bg-gray-900 text-white' : 'text-gray-900'}"
             - if @location_inventory_path
-              - inventory_active = request.path.end_with?("/inventory")
               = link_to "Inventory", @location_inventory_path,
-                  class: "px-4 py-2 text-lg font-medium #{inventory_active ? 'bg-gray-900 text-white' : 'text-gray-900'}"
+                  class: "px-4 py-2 text-lg font-medium #{@location_active == :inventory ? 'bg-gray-900 text-white' : 'text-gray-900'}"
+            - if @location_donors_path
+              = link_to "Donors", @location_donors_path,
+                  class: "px-4 py-2 text-lg font-medium #{@location_active == :donors ? 'bg-gray-900 text-white' : 'text-gray-900'}"
             - if @location_admin
-              - users_active = request.path.end_with?("/users")
               = link_to "Manage Users", @location_users_path,
-                  class: "px-4 py-2 text-lg font-medium #{users_active ? 'bg-gray-900 text-white' : 'text-gray-900'}"
+                  class: "px-4 py-2 text-lg font-medium #{@location_active == :users ? 'bg-gray-900 text-white' : 'text-gray-900'}"
         .flex.items-center.gap-8
           %span.text-lg.text-gray-700= current_user.name
           = button_to "Log out", logout_path, method: :delete, class: "text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"

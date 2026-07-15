@@ -8,6 +8,7 @@ class ProductionsController < ApplicationController
   end
 
   def tickets
+    @location_active = :tickets
     @tab = params[:tab].presence_in(%w[requested pending completed delivered distributed archived]) || "requested"
     @tab_counts = @production.bike_requests.group(:status).count
     scope = @production.bike_requests.where(status: @tab)
@@ -17,10 +18,12 @@ class ProductionsController < ApplicationController
   end
 
   def inventory
+    @location_active = :inventory
     @inventory = @production.inventory || @production.create_inventory!
   end
 
   def users
+    @location_active = :users
     render plain: "Access denied", status: :forbidden and return unless @location_admin
     members_scope = @production.user_productions.includes(:user).order("users.name")
     @pagy_members, @members = pagy(members_scope, limit: 20)
@@ -47,6 +50,7 @@ class ProductionsController < ApplicationController
     @location_admin        = production_admin?(@production)
     @location_users_path   = users_production_path(@production)
     @location_inventory_path = inventory_production_path(@production)
+    @location_donors_path    = production_donors_path(@production)
     @location_show_tickets   = true
   end
 end

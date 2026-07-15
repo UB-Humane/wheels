@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_15_201738) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_15_221111) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -51,6 +51,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_15_201738) do
     t.datetime "created_at", null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "donors", force: :cascade do |t|
+    t.string "address"
+    t.boolean "archived", default: false, null: false
+    t.datetime "created_at", null: false
+    t.string "email"
+    t.string "first_name", null: false
+    t.string "last_name", null: false
+    t.string "mobile"
+    t.bigint "production_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["production_id"], name: "index_donors_on_production_id"
   end
 
   create_table "production_inventories", force: :cascade do |t|
@@ -106,6 +119,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_15_201738) do
   add_foreign_key "bike_requests", "productions"
   add_foreign_key "bike_requests", "users"
   add_foreign_key "bikes", "bike_requests"
+  add_foreign_key "donors", "productions"
   add_foreign_key "production_inventories", "productions"
   add_foreign_key "user_distributions", "distributions"
   add_foreign_key "user_distributions", "users"

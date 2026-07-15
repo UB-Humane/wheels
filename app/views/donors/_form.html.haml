@@ -1,0 +1,40 @@
+= form_with model: [@production, donor], class: "space-y-6 max-w-lg" do |f|
+  .flex.gap-4
+    .flex-1.space-y-2
+      = f.label :first_name, "First name", class: "block text-xl font-medium text-gray-900"
+      = f.text_field :first_name, autofocus: true,
+          class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+      - donor.errors[:first_name].each do |msg|
+        %p.text-lg.text-red-700= msg
+    .flex-1.space-y-2
+      = f.label :last_name, "Last name", class: "block text-xl font-medium text-gray-900"
+      = f.text_field :last_name,
+          class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+      - donor.errors[:last_name].each do |msg|
+        %p.text-lg.text-red-700= msg
+
+  .space-y-2
+    = f.label :email, "Email (optional)", class: "block text-xl font-medium text-gray-900"
+    = f.email_field :email,
+        class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+    - donor.errors[:email].each do |msg|
+      %p.text-lg.text-red-700= msg
+
+  .space-y-2
+    = f.label :mobile, "Mobile (optional)", class: "block text-xl font-medium text-gray-900"
+    = f.telephone_field :mobile,
+        class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+    - donor.errors[:mobile].each do |msg|
+      %p.text-lg.text-red-700= msg
+
+  .space-y-2
+    = f.label :address, "Address (optional)", class: "block text-xl font-medium text-gray-900"
+    = f.text_field :address,
+        class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+    - donor.errors[:address].each do |msg|
+      %p.text-lg.text-red-700= msg
+
+  .flex.gap-4
+    = f.submit (donor.persisted? ? "Save Changes" : "Add Donor"),
+        class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"
+    = link_to "Cancel", production_donors_path(@production), class: "px-6 py-3 text-lg font-medium text-gray-900 underline"

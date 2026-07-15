@@ -25,6 +25,7 @@ Rails.application.routes.draw do
     get :tickets,   on: :member
     get :users,     on: :member
     get :inventory, on: :member
+    resources :donors,           only: [ :index, :new, :create, :edit, :update ]
     resources :user_productions, only: [ :create, :update, :destroy ]
   end
   resources :production_inventories, only: [ :update ]
