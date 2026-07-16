@@ -5,6 +5,10 @@ class DonorsControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
   end
 
+  def login_as_prod_volunteer
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
+  end
+
   def login_as_dist_user
     post login_path, params: { email: users(:dist_user).email, password: "password" }
   end
@@ -20,13 +24,19 @@ class DonorsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
   end
 
+  test "index returns 403 for production volunteer" do
+    login_as_prod_volunteer
+    get production_donors_path(production)
+    assert_response :forbidden
+  end
+
   test "index returns 403 for distribution user" do
     login_as_dist_user
     get production_donors_path(production)
     assert_response :forbidden
   end
 
-  test "index renders for production user" do
+  test "index renders for production admin" do
     login_as_prod_admin
     get production_donors_path(production)
     assert_response :success
@@ -84,13 +94,19 @@ class DonorsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
   end
 
+  test "new returns 403 for production volunteer" do
+    login_as_prod_volunteer
+    get new_production_donor_path(production)
+    assert_response :forbidden
+  end
+
   test "new returns 403 for distribution user" do
     login_as_dist_user
     get new_production_donor_path(production)
     assert_response :forbidden
   end
 
-  test "new renders for production user" do
+  test "new renders for production admin" do
     login_as_prod_admin
     get new_production_donor_path(production)
     assert_response :success
@@ -101,6 +117,18 @@ class DonorsControllerTest < ActionDispatch::IntegrationTest
   test "create requires authentication" do
     post production_donors_path(production), params: { donor: { first_name: "Test", last_name: "Person" } }
     assert_redirected_to login_path
+  end
+
+  test "create returns 403 for production volunteer" do
+    login_as_prod_volunteer
+    post production_donors_path(production), params: { donor: { first_name: "New", last_name: "Donor" } }
+    assert_response :forbidden
+  end
+
+  test "create returns 403 for distribution user" do
+    login_as_dist_user
+    post production_donors_path(production), params: { donor: { first_name: "New", last_name: "Donor" } }
+    assert_response :forbidden
   end
 
   test "create saves donor and redirects" do
@@ -140,13 +168,19 @@ class DonorsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
   end
 
+  test "edit returns 403 for production volunteer" do
+    login_as_prod_volunteer
+    get edit_production_donor_path(production, donors(:active_donor))
+    assert_response :forbidden
+  end
+
   test "edit returns 403 for distribution user" do
     login_as_dist_user
     get edit_production_donor_path(production, donors(:active_donor))
     assert_response :forbidden
   end
 
-  test "edit renders for production user" do
+  test "edit renders for production admin" do
     login_as_prod_admin
     get edit_production_donor_path(production, donors(:active_donor))
     assert_response :success
@@ -157,6 +191,18 @@ class DonorsControllerTest < ActionDispatch::IntegrationTest
   test "update requires authentication" do
     patch production_donor_path(production, donors(:active_donor)), params: { donor: { first_name: "Updated" } }
     assert_redirected_to login_path
+  end
+
+  test "update returns 403 for production volunteer" do
+    login_as_prod_volunteer
+    patch production_donor_path(production, donors(:active_donor)), params: { donor: { first_name: "Updated", last_name: "Doe" } }
+    assert_response :forbidden
+  end
+
+  test "update returns 403 for distribution user" do
+    login_as_dist_user
+    patch production_donor_path(production, donors(:active_donor)), params: { donor: { first_name: "Updated", last_name: "Doe" } }
+    assert_response :forbidden
   end
 
   test "update saves changes and redirects" do

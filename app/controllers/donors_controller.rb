@@ -1,6 +1,7 @@
 class DonorsController < ApplicationController
   before_action :set_production
   before_action :check_access
+  before_action :require_admin_access
   before_action :set_location_nav
   before_action :set_donor, only: [ :edit, :update ]
 
@@ -56,6 +57,10 @@ class DonorsController < ApplicationController
 
   def check_access
     require_production_access(@production)
+  end
+
+  def require_admin_access
+    render plain: "Access denied", status: :forbidden unless production_admin?(@production)
   end
 
   def set_location_nav
