@@ -187,6 +187,13 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert bike_requests(:requested_bike).reload.pending?
   end
 
+  test "update approve saves owner" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:requested_bike)),
+          params: { status: "approve", owner_id: users(:prod_admin).id }
+    assert_equal users(:prod_admin), bike_requests(:requested_bike).reload.owner
+  end
+
   test "update approve redirects to production pending tab" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch bike_request_path(bike_requests(:requested_bike)), params: { status: "approve" }

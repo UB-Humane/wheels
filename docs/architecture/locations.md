@@ -39,13 +39,14 @@ Nested routes:
 
 Distributions submit bike requests to a production. One request = one person with one or more bikes. Productions can also submit internal requests directly (no distribution).
 
-Model: `BikeRequest` — fields: `phone` (10 digits exactly, no formatting), `requestor_name`, `due_date`, `status` (enum), `denial_reason`, `status_before_archival`
+Model: `BikeRequest` — fields: `phone` (10 digits exactly, no formatting), `requestor_name`, `due_date`, `status` (enum), `denial_reason`, `status_before_archival`, `owner_id` (FK to users — the production member assigned at approval)
 
 Each request `has_many :bikes`. `Bike` fields: `name` (optional), `bike_type` (enum: male/female/kid, default male), `age` (required when type is kid), `height`, `notes` (all optional).
 
 Status flow: `requested (1)` → production approves → `pending (0)` → master mechanic marks ready → `ready_for_delivery (2)` → production marks delivered → `delivered (3)` → requestor marks distributed → `distributed (4)`. Production can also deny: `requested` → `denied (5)` → distribution edits and resubmits → `requested`.
 
 - Distribution-submitted requests start as `requested` (awaiting approval); production-submitted requests start as `pending` (skip approval)
+- Approving a request requires selecting a production member as the owner via a live-search dropdown; Approve is disabled until one is chosen. The owner is stored on the record.
 - Only a `master_mechanic` (or superadmin) can advance `pending` → `ready_for_delivery` via the "Ready for Delivery" button
 - "Mark Distributed" is restricted to the entity that submitted the request: distribution users for distribution-submitted requests, production users for production-submitted requests
 - Denied cards show a red outline in the distribution's requested tab

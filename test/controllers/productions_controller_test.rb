@@ -170,4 +170,35 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_includes results, users(:no_location_user)
     assert_includes results, users(:dist_user)
   end
+
+  # --- members action ---
+
+  test "members requires authentication" do
+    get members_production_path(productions(:main_production)), params: { q: "admin" }
+    assert_redirected_to login_path
+  end
+
+  test "members returns 403 for user without production access" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    get members_production_path(productions(:main_production)), params: { q: "admin" }
+    assert_response :forbidden
+  end
+
+  test "members returns matching production members as JSON" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get members_production_path(productions(:main_production)), params: { q: "Production Admin" }
+    assert_response :success
+    result = JSON.parse(response.body)
+    assert_equal 1, result.length
+    assert_equal users(:prod_admin).id, result.first["id"]
+    assert_equal users(:prod_admin).name, result.first["name"]
+  end
+
+  test "members does not return users outside the production" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get members_production_path(productions(:main_production)), params: { q: "Distribution User" }
+    assert_response :success
+    result = JSON.parse(response.body)
+    assert_empty result
+  end
 end

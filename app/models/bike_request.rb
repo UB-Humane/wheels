@@ -2,6 +2,7 @@ class BikeRequest < ApplicationRecord
   belongs_to :distribution, optional: true
   belongs_to :production
   belongs_to :user
+  belongs_to :owner, class_name: "User", optional: true
 
   has_many :bikes, dependent: :destroy
   accepts_nested_attributes_for :bikes, allow_destroy: true

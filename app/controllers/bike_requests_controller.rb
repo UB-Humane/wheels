@@ -63,7 +63,7 @@ class BikeRequestsController < ApplicationController
     restored = BikeRequest.statuses.key(@bike_request.status_before_archival) if params[:status] == "unarchive"
 
     attributes = case params[:status]
-    when "approve"      then { status: :pending }
+    when "approve"      then { status: :pending, owner_id: params[:owner_id].presence }
     when "deny"         then { status: :denied, denial_reason: params[:denial_reason].presence }
     when "ready_for_delivery" then { status: :ready_for_delivery }
     when "delivered"    then { status: :delivered }

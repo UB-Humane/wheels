@@ -22,6 +22,15 @@ class ProductionsController < ApplicationController
     @inventory = @production.inventory || @production.create_inventory!
   end
 
+  def members
+    q = "%#{params[:q]}%"
+    users = User.joins(:user_productions)
+                .where(user_productions: { production: @production })
+                .where("users.name ILIKE ? OR users.email ILIKE ?", q, q)
+                .order(:name).limit(10)
+    render json: users.map { |u| { id: u.id, name: u.name, email: u.email } }
+  end
+
   def users
     @location_active = :users
     render plain: "Access denied", status: :forbidden and return unless @location_admin

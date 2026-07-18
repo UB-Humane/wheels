@@ -41,6 +41,51 @@
     win.document.write('<html><body style="font-family:sans-serif;padding:16px;max-width:420px">' + html + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>');
     win.document.close();
   }
+  function setupOwnerSearch(bikeRequestId, productionId) {
+    var input    = document.getElementById('owner-search-' + bikeRequestId);
+    var hidden   = document.getElementById('owner-id-'     + bikeRequestId);
+    var dropdown = document.getElementById('owner-drop-'   + bikeRequestId);
+    var btn      = document.getElementById('approve-btn-'  + bikeRequestId);
+    var debounce;
+    input.addEventListener('input', function() {
+      clearTimeout(debounce);
+      hidden.value = '';
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+      btn.classList.remove('cursor-pointer');
+      debounce = setTimeout(function() {
+        var q = input.value.trim();
+        if (!q) { dropdown.hidden = true; return; }
+        fetch('/productions/' + productionId + '/members?q=' + encodeURIComponent(q))
+          .then(function(r) { return r.json(); })
+          .then(function(users) {
+            dropdown.innerHTML = '';
+            if (!users.length) { dropdown.hidden = true; return; }
+            users.forEach(function(u) {
+              var li = document.createElement('li');
+              li.textContent = u.name + ' [' + u.email + ']';
+              li.style.cssText = 'padding:8px 12px;cursor:pointer;font-size:1.125rem;list-style:none';
+              li.addEventListener('mouseenter', function() { li.style.background = '#f3f4f6'; });
+              li.addEventListener('mouseleave', function() { li.style.background = ''; });
+              li.addEventListener('click', function() {
+                hidden.value = u.id;
+                input.value  = u.name;
+                dropdown.hidden = true;
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.classList.add('cursor-pointer');
+              });
+              dropdown.appendChild(li);
+            });
+            dropdown.hidden = false;
+          });
+      }, 200);
+    });
+    document.addEventListener('click', function(e) {
+      if (!input.contains(e.target) && !dropdown.contains(e.target))
+        dropdown.hidden = true;
+    });
+  }
 
 - tabs = %w[requested pending ready_for_delivery delivered distributed archived]
 .flex.border-b-2.border-gray-900.mb-8
@@ -99,8 +144,23 @@
         .flex.gap-4.mt-2
           - if production_view
             - if req.requested?
-              = button_to "Approve", bike_request_path(req), method: :patch, params: { status: "approve" },
-                  class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
+              = form_with url: bike_request_path(req), method: :patch, class: "flex items-center gap-3" do |f|
+                = hidden_field_tag :status, "approve"
+                = hidden_field_tag :owner_id, "", id: "owner-id-#{req.id}"
+                .relative
+                  %input.px-3.py-2.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{
+                    type: "text", autocomplete: "off",
+                    id: "owner-search-#{req.id}",
+                    placeholder: "Assign to..."
+                  }
+                  %ul.absolute.z-10.bg-white.border-2.border-gray-900.w-full.p-0.m-0{
+                    id: "owner-drop-#{req.id}", hidden: true, style: "max-height:200px;overflow-y:auto"
+                  }
+                = submit_tag "Approve", disabled: true,
+                    id: "approve-btn-#{req.id}",
+                    class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 transition-colors border-0 opacity-50 cursor-not-allowed"
+              :javascript
+                setupOwnerSearch(#{req.id}, #{req.production.id});
               = form_with url: bike_request_path(req), method: :patch, class: "flex gap-2 items-center" do |f|
                 = hidden_field_tag :status, "deny"
                 = text_field_tag :denial_reason, nil, placeholder: "Reason (optional)", class: "px-3 py-2 text-lg border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
