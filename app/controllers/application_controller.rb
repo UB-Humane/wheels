@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
 
   before_action :require_authentication
 
-  helper_method :current_user, :production_admin?, :distribution_admin?, :production_master_mechanic?
+  helper_method :current_user, :production_admin?, :distribution_admin?, :production_master_mechanic?, :requestor_for?
 
   private
 
@@ -43,6 +43,15 @@ class ApplicationController < ActionController::Base
   def production_master_mechanic?(production)
     current_user&.superadmin? ||
       current_user&.user_productions&.find_by(production: production)&.master_mechanic?
+  end
+
+  def requestor_for?(bike_request)
+    return true if current_user&.superadmin?
+    if bike_request.distribution.present?
+      current_user&.distributions&.include?(bike_request.distribution)
+    else
+      current_user&.productions&.include?(bike_request.production)
+    end
   end
 
   def distribution_admin?(distribution)

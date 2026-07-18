@@ -112,8 +112,6 @@
               = button_to "Mark Delivered", bike_request_path(req), method: :patch, params: { status: "delivered" },
                   class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
             - elsif req.delivered?
-              = button_to "Mark Distributed", bike_request_path(req), method: :patch, params: { status: "distributed" },
-                  class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
               = button_to "Back to Ready for Delivery", bike_request_path(req), method: :patch, params: { status: "ready_for_delivery" },
                   class: "px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
             - elsif req.distributed?
@@ -125,6 +123,9 @@
           - else
             - if req.requested? || req.denied?
               = link_to "Edit", edit_bike_request_path(req), class: "px-4 py-2 text-lg font-medium text-gray-900 underline"
+          - if req.delivered? && requestor_for?(req)
+            = button_to "Mark Distributed", bike_request_path(req), method: :patch, params: { status: "distributed" },
+                class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
           - if production_view && !req.requested? && !req.archived?
             %button.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer.self-center{type: "button", onclick: "printAllBikeLabels(#{req.bikes_label_data.to_json}, #{req.requestor_name.to_json}, #{req.phone.to_json}, #{req.due_date.strftime('%-m/%-d/%Y').to_json})"} Print All
             %button.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer.self-center{type: "button", onclick: "printCard(#{req.bikes_label_data.to_json}, #{req.requestor_name.to_json}, #{req.phone.to_json}, #{req.due_date.strftime('%-m/%-d/%Y').to_json})"} Print Overview

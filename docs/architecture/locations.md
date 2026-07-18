@@ -37,21 +37,28 @@ Nested routes:
 
 ## Bike Requests
 
-Distributions submit bike requests to a production. One request = one person with one or more bikes.
+Distributions submit bike requests to a production. One request = one person with one or more bikes. Productions can also submit internal requests directly (no distribution).
 
-Model: `BikeRequest` — fields: `phone` (10 digits exactly, no formatting), `requestor_name`, `due_date`, `status` (enum)
+Model: `BikeRequest` — fields: `phone` (10 digits exactly, no formatting), `requestor_name`, `due_date`, `status` (enum), `denial_reason`, `status_before_archival`
 
-Each request `has_many :bikes`. `Bike` fields: `name` (optional), `bike_type` (enum: any/male/female/kid, default any), `age`, `height`, `notes` (all optional), `completed` (boolean).
+Each request `has_many :bikes`. `Bike` fields: `name` (optional), `bike_type` (enum: male/female/kid, default male), `age` (required when type is kid), `height`, `notes` (all optional).
 
-Status flow: `pending (1)` → production approves → `requested (0)` → `completed (2)` → `delivered (3)` → `distributed (4)`. Production can also deny: `pending` → `denied (5)` → distribution edits and resubmits → `pending`.
+Status flow: `requested (1)` → production approves → `pending (0)` → master mechanic marks ready → `ready_for_delivery (2)` → production marks delivered → `delivered (3)` → requestor marks distributed → `distributed (4)`. Production can also deny: `requested` → `denied (5)` → distribution edits and resubmits → `requested`.
 
-- New requests default to `pending`; production must approve before they enter the work queue
-- Denied cards show a red outline in the distribution's pending tab
-- Each bike row has Done/Undo buttons (production view); all bikes completed auto-advances the card to `completed`; uncompleting a bike on a completed card reverts it to `requested`
-- Back-transitions allowed at each step (completed ↔ delivered ↔ distributed)
+- Distribution-submitted requests start as `requested` (awaiting approval); production-submitted requests start as `pending` (skip approval)
+- Only a `master_mechanic` (or superadmin) can advance `pending` → `ready_for_delivery` via the "Ready for Delivery" button
+- "Mark Distributed" is restricted to the entity that submitted the request: distribution users for distribution-submitted requests, production users for production-submitted requests
+- Denied cards show a red outline in the distribution's requested tab
+- Cards can be archived from any non-requested, non-archived status; unarchiving restores the previous status
+- Back-transitions allowed at each step (ready_for_delivery ↔ delivered ↔ distributed)
+
+Production roles in `UserProduction::ROLES`: `admin`, `volunteer`, `master_mechanic`
 
 Routes:
 - `GET /distributions/:distribution_id/bike_requests/new` — new request form (distribution access)
 - `POST /distributions/:distribution_id/bike_requests` — create (distribution access)
-- `GET /bike_requests/:id/edit` — edit pending/denied request (distribution access)
-- `PATCH /bike_requests/:id` — approve/deny/status update (production) or resubmit (distribution)
+- `GET /productions/:production_id/bike_requests/new` — new internal request form (production access)
+- `POST /productions/:production_id/bike_requests` — create internal request (production access)
+- `GET /bike_requests/:id/edit` — edit requested/denied request (distribution access)
+- `PATCH /bike_requests/:id` — approve/deny/status update (production), mark distributed (requestor), or resubmit (distribution)
+- `PATCH /bike_requests/:id/complete_all` — advance pending → ready_for_delivery (master mechanic only)

@@ -40,7 +40,15 @@ class BikeRequestsController < ApplicationController
   end
 
   def update
-    if params[:status].in?(%w[approve deny ready_for_delivery delivered distributed archive unarchive])
+    if params[:status] == "distributed"
+      return render plain: "Access denied", status: :forbidden unless requestor_for?(@bike_request)
+      @bike_request.update!(status: :distributed)
+      if @bike_request.distribution.present?
+        redirect_to tickets_distribution_path(@bike_request.distribution, tab: "distributed")
+      else
+        redirect_to tickets_production_path(@bike_request.production, tab: "distributed")
+      end
+    elsif params[:status].in?(%w[approve deny ready_for_delivery delivered archive unarchive])
       return render plain: "Access denied", status: :forbidden unless authorized_for_production?
       handle_production_update
     else
@@ -59,7 +67,6 @@ class BikeRequestsController < ApplicationController
     when "deny"         then { status: :denied, denial_reason: params[:denial_reason].presence }
     when "ready_for_delivery" then { status: :ready_for_delivery }
     when "delivered"    then { status: :delivered }
-    when "distributed"  then { status: :distributed }
     when "archive"      then { status: :archived, status_before_archival: @bike_request.read_attribute(:status) }
     when "unarchive"    then { status: restored, status_before_archival: nil }
     end

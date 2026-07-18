@@ -211,10 +211,30 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert bike_requests(:completed_bike).reload.delivered?
   end
 
-  test "update distributed sets status to distributed" do
+  test "update distributed returns 403 for non-requestor production user" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch bike_request_path(bike_requests(:completed_bike)), params: { status: "distributed" }
+    assert_response :forbidden
+  end
+
+  test "update distributed allows distribution requestor" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    patch bike_request_path(bike_requests(:completed_bike)), params: { status: "distributed" }
     assert bike_requests(:completed_bike).reload.distributed?
+  end
+
+  test "update distributed redirects distribution requestor to distribution distributed tab" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    patch bike_request_path(bike_requests(:completed_bike)), params: { status: "distributed" }
+    assert_redirected_to tickets_distribution_path(distributions(:downtown_dist), tab: "distributed")
+  end
+
+  test "update distributed allows production user on production-submitted request" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    br = bike_requests(:completed_bike)
+    br.update_columns(distribution_id: nil)
+    patch bike_request_path(br), params: { status: "distributed" }
+    assert br.reload.distributed?
   end
 
   test "update ready_for_delivery sets status to ready_for_delivery" do
