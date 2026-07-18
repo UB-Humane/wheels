@@ -217,24 +217,24 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert bike_requests(:completed_bike).reload.distributed?
   end
 
-  test "update completed sets status to completed" do
+  test "update ready_for_delivery sets status to ready_for_delivery" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "completed" }
-    assert bike_requests(:pending_bike).reload.completed?
+    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "ready_for_delivery" }
+    assert bike_requests(:pending_bike).reload.ready_for_delivery?
   end
 
-  test "update delivered from completed sets status to delivered" do
+  test "update delivered from ready_for_delivery sets status to delivered" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch bike_request_path(bike_requests(:completed_bike)), params: { status: "delivered" }
     assert bike_requests(:completed_bike).reload.delivered?
   end
 
-  test "update back to completed from delivered" do
+  test "update back to ready_for_delivery from delivered" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     br = bike_requests(:completed_bike)
     br.update_columns(status: BikeRequest.statuses[:delivered])
-    patch bike_request_path(br), params: { status: "completed" }
-    assert br.reload.completed?
+    patch bike_request_path(br), params: { status: "ready_for_delivery" }
+    assert br.reload.ready_for_delivery?
   end
 
   test "update back to delivered from distributed" do
@@ -307,28 +307,28 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
   end
 
-  test "complete_all returns 403 for user without production access" do
+  test "complete_all returns 403 for distribution user" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
     patch complete_all_bike_request_path(bike_requests(:pending_bike))
     assert_response :forbidden
   end
 
-  test "complete_all marks all bikes as completed" do
+  test "complete_all returns 403 for production admin" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch complete_all_bike_request_path(bike_requests(:pending_bike))
-    assert bike_requests(:pending_bike).bikes.reload.all?(&:completed?)
+    assert_response :forbidden
   end
 
-  test "complete_all sets request status to completed" do
-    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+  test "complete_all sets request status to ready_for_delivery" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
     patch complete_all_bike_request_path(bike_requests(:pending_bike))
-    assert bike_requests(:pending_bike).reload.completed?
+    assert bike_requests(:pending_bike).reload.ready_for_delivery?
   end
 
-  test "complete_all redirects to production completed tab" do
-    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+  test "complete_all redirects to production ready_for_delivery tab" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
     patch complete_all_bike_request_path(bike_requests(:pending_bike))
-    assert_redirected_to tickets_production_path(productions(:main_production), tab: "completed")
+    assert_redirected_to tickets_production_path(productions(:main_production), tab: "ready_for_delivery")
   end
 
   # --- update: distribution resubmit ---

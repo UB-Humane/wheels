@@ -79,8 +79,8 @@ class BikeRequestTest < ActiveSupport::TestCase
 
   test "status transitions through all values" do
     br = bike_requests(:requested_bike)
-    br.update!(status: :completed)
-    assert br.completed?
+    br.update!(status: :ready_for_delivery)
+    assert br.ready_for_delivery?
     br.update!(status: :delivered)
     assert br.delivered?
     br.update!(status: :distributed)

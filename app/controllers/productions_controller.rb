@@ -9,7 +9,7 @@ class ProductionsController < ApplicationController
 
   def tickets
     @location_active = :tickets
-    @tab = params[:tab].presence_in(%w[requested pending completed delivered distributed archived]) || "requested"
+    @tab = params[:tab].presence_in(%w[requested pending ready_for_delivery delivered distributed archived]) || "requested"
     @tab_counts = @production.bike_requests.group(:status).count
     scope = @production.bike_requests.where(status: @tab)
                     .includes(:distribution, :user, :bikes)

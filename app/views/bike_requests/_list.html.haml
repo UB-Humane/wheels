@@ -42,11 +42,11 @@
     win.document.close();
   }
 
-- tabs = %w[requested pending completed delivered distributed archived]
+- tabs = %w[requested pending ready_for_delivery delivered distributed archived]
 .flex.border-b-2.border-gray-900.mb-8
   - tabs.each do |tab|
     = link_to url_for(tab: tab), class: "px-6 py-3 text-lg font-medium #{active_tab == tab ? 'font-bold border-b-4 border-gray-900 -mb-0.5' : 'text-gray-500'}" do
-      = tab.capitalize
+      = tab.titleize
       %span.ml-1= "(#{tab_counts[tab] || 0})"
 
 - if bike_requests.any?
@@ -73,33 +73,27 @@
                     %polyline{points: "21 8 21 21 3 21 3 8"}
                     %line{x1: "10", y1: "13", x2: "14", y2: "13"}
 
-        .overflow-x-auto
-          %table.w-full.border-collapse
-            %thead
-              %tr.border-b-2.border-gray-200
-                %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-700 Name
-                %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-700 Type
-                %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-700 Age
-                %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-700 Height
-                %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-700 Notes
-                - if production_view && !req.requested? && !req.archived?
-                  %th
-            %tbody
-              - req.bikes.each do |bike|
-                %tr.border-b.border-gray-200
-                  %td.px-3.py-2.text-lg.text-gray-900= bike.name.presence || "—"
-                  %td.px-3.py-2.text-lg.text-gray-900= bike.bike_type.capitalize
-                  %td.px-3.py-2.text-lg.text-gray-900= bike.age || "—"
-                  %td.px-3.py-2.text-lg.text-gray-900= bike.height.presence || "—"
-                  %td.px-3.py-2.text-lg.text-gray-900= bike.notes.presence || "—"
-                  - if production_view && !req.requested? && !req.archived?
-                    %td.px-3.py-2
-                      - if bike.completed?
-                        = button_to "Undo", bike_path(bike), method: :patch,
-                            class: "px-3 py-1 text-lg font-medium text-gray-500 underline bg-transparent border-0 cursor-pointer"
-                      - else
-                        = button_to "Done", bike_path(bike), method: :patch,
-                            class: "px-3 py-1 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
+        %details.bg-gray-50.border.border-gray-200
+          %summary.flex.items-center.justify-between.px-3.py-2.text-lg.font-medium.text-gray-700.cursor-pointer.select-none.list-none
+            = pluralize(req.bikes.size, "bike")
+            %span.text-gray-400 ▾
+          .overflow-x-auto.mt-3
+            %table.w-full.border-collapse
+              %thead
+                %tr.border-b-2.border-gray-200
+                  %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-700 Name
+                  %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-700 Type
+                  %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-700 Age
+                  %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-700 Height
+                  %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-700 Notes
+              %tbody
+                - req.bikes.each do |bike|
+                  %tr.border-b.border-gray-200
+                    %td.px-3.py-2.text-lg.text-gray-900= bike.name.presence || "—"
+                    %td.px-3.py-2.text-lg.text-gray-900= bike.bike_type.capitalize
+                    %td.px-3.py-2.text-lg.text-gray-900= bike.age || "—"
+                    %td.px-3.py-2.text-lg.text-gray-900= bike.height.presence || "—"
+                    %td.px-3.py-2.text-lg.text-gray-900= bike.notes.presence || "—"
 
 
         .flex.gap-4.mt-2
@@ -111,16 +105,16 @@
                 = hidden_field_tag :status, "deny"
                 = text_field_tag :denial_reason, nil, placeholder: "Reason (optional)", class: "px-3 py-2 text-lg border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
                 = submit_tag "Deny", class: "px-6 py-3 text-lg font-bold text-white bg-red-700 hover:bg-red-600 cursor-pointer transition-colors border-0"
-            - elsif req.pending?
-              = button_to "Mark All as Done", complete_all_bike_request_path(req), method: :patch,
+            - elsif req.pending? && production_master_mechanic?(req.production)
+              = button_to "Ready for Delivery", complete_all_bike_request_path(req), method: :patch,
                   class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
-            - elsif req.completed?
+            - elsif req.ready_for_delivery?
               = button_to "Mark Delivered", bike_request_path(req), method: :patch, params: { status: "delivered" },
                   class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
             - elsif req.delivered?
               = button_to "Mark Distributed", bike_request_path(req), method: :patch, params: { status: "distributed" },
                   class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
-              = button_to "Back to Completed", bike_request_path(req), method: :patch, params: { status: "completed" },
+              = button_to "Back to Ready for Delivery", bike_request_path(req), method: :patch, params: { status: "ready_for_delivery" },
                   class: "px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
             - elsif req.distributed?
               = button_to "Back to Delivered", bike_request_path(req), method: :patch, params: { status: "delivered" },
@@ -143,4 +137,4 @@
       - if pagy.next
         = link_to "Next →", url_for(tab: active_tab, page: pagy.next), class: "text-gray-900 underline"
 - else
-  %p.text-xl.text-gray-500 No #{active_tab} requests.
+  %p.text-xl.text-gray-500= "No requests #{active_tab.gsub("_", " ")}."

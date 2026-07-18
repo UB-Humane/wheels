@@ -6,7 +6,7 @@ class BikeRequest < ApplicationRecord
   has_many :bikes, dependent: :destroy
   accepts_nested_attributes_for :bikes, allow_destroy: true
 
-  enum :status, { pending: 0, requested: 1, completed: 2, delivered: 3, distributed: 4, denied: 5, archived: 6 }
+  enum :status, { pending: 0, requested: 1, ready_for_delivery: 2, delivered: 3, distributed: 4, denied: 5, archived: 6 }
 
   validates :phone, presence: true, format: { with: /\A\d{10}\z/, message: "must be exactly 10 digits" }
   validates :requestor_name, presence: true

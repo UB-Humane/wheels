@@ -34,14 +34,13 @@ class BikeRequestsController < ApplicationController
   end
 
   def complete_all
-    return render plain: "Access denied", status: :forbidden unless authorized_for_production?
-    @bike_request.bikes.update_all(completed: true)
-    @bike_request.update_columns(status: BikeRequest.statuses[:completed]) if @bike_request.pending?
-    redirect_to tickets_production_path(@bike_request.production, tab: "completed")
+    return render plain: "Access denied", status: :forbidden unless production_master_mechanic?(@bike_request.production)
+    @bike_request.update_columns(status: BikeRequest.statuses[:ready_for_delivery]) if @bike_request.pending?
+    redirect_to tickets_production_path(@bike_request.production, tab: "ready_for_delivery")
   end
 
   def update
-    if params[:status].in?(%w[approve deny completed delivered distributed archive unarchive])
+    if params[:status].in?(%w[approve deny ready_for_delivery delivered distributed archive unarchive])
       return render plain: "Access denied", status: :forbidden unless authorized_for_production?
       handle_production_update
     else
@@ -58,7 +57,7 @@ class BikeRequestsController < ApplicationController
     attributes = case params[:status]
     when "approve"      then { status: :pending }
     when "deny"         then { status: :denied, denial_reason: params[:denial_reason].presence }
-    when "completed"    then { status: :completed }
+    when "ready_for_delivery" then { status: :ready_for_delivery }
     when "delivered"    then { status: :delivered }
     when "distributed"  then { status: :distributed }
     when "archive"      then { status: :archived, status_before_archival: @bike_request.read_attribute(:status) }

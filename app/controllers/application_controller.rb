@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
 
   before_action :require_authentication
 
-  helper_method :current_user, :production_admin?, :distribution_admin?
+  helper_method :current_user, :production_admin?, :distribution_admin?, :production_master_mechanic?
 
   private
 
@@ -37,7 +37,12 @@ class ApplicationController < ActionController::Base
 
   def production_admin?(production)
     current_user&.superadmin? ||
-      current_user&.user_productions&.find_by(production: production)&.role == "admin"
+      current_user&.user_productions&.find_by(production: production)&.admin?
+  end
+
+  def production_master_mechanic?(production)
+    current_user&.superadmin? ||
+      current_user&.user_productions&.find_by(production: production)&.master_mechanic?
   end
 
   def distribution_admin?(distribution)

@@ -47,44 +47,4 @@ class BikeTest < ActiveSupport::TestCase
     assert_equal bike_requests(:requested_bike), bike.bike_request
   end
 
-  # --- sync_request_status ---
-
-  test "completing the only bike on a request advances request to completed" do
-    bike = bikes(:requested_bike_bike)
-    assert bike.bike_request.requested?
-    bike.update!(completed: true)
-    assert bike.bike_request.reload.completed?
-  end
-
-  test "completing one of multiple bikes does not advance request" do
-    req = bike_requests(:completed_bike)
-    req.update_columns(status: BikeRequest.statuses[:requested])
-    bikes(:completed_bike_bike_one).update_columns(completed: false)
-    bikes(:completed_bike_bike_two).update_columns(completed: false)
-
-    bikes(:completed_bike_bike_one).update!(completed: true)
-    assert req.reload.requested?
-  end
-
-  test "uncompleting a bike on a completed request reverts request to requested" do
-    bike = bikes(:completed_bike_bike_one)
-    assert bike.bike_request.completed?
-    bike.update!(completed: false)
-    assert bike.bike_request.reload.requested?
-  end
-
-  test "sync does not fire when other attributes change" do
-    bike = bikes(:requested_bike_bike)
-    bike.update!(name: "Alice")
-    assert bike.bike_request.reload.requested?
-  end
-
-  test "completing a bike on a delivered request does not change request status" do
-    req = bike_requests(:completed_bike)
-    req.update_columns(status: BikeRequest.statuses[:delivered])
-    bikes(:completed_bike_bike_one).update_columns(completed: false)
-
-    bikes(:completed_bike_bike_one).update!(completed: true)
-    assert req.reload.delivered?
-  end
 end

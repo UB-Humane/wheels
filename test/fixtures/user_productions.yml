@@ -17,3 +17,8 @@ prod_volunteer_main:
   user: prod_volunteer
   production: main_production
   role: volunteer
+
+master_mechanic_main:
+  user: master_mechanic_user
+  production: main_production
+  role: master_mechanic
