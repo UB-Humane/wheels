@@ -32,6 +32,7 @@
               %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-900 Age
               %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-900 Height
               %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-900 Notes
+              %th
           %tbody#bikes-tbody
             = f.fields_for :bikes do |bf|
               = render "bike_form_row", bf: bf
@@ -43,6 +44,16 @@
 
   :javascript
     var bikeRowIndex = 1;
+    function removeBikeRow(btn) {
+      var row = btn.closest('tr');
+      var destroyField = row.querySelector('.destroy-field');
+      if (destroyField) {
+        destroyField.value = '1';
+        row.style.display = 'none';
+      } else {
+        row.remove();
+      }
+    }
     function addBikeRow() {
       var tbody = document.getElementById('bikes-tbody');
       var html = document.getElementById('bike-row-template').innerHTML
@@ -67,3 +78,5 @@
     %input.w-28.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "text", name: "bike_request[bikes_attributes][NEW_INDEX][height]", placeholder: "5'4\""}
   %td.px-3.py-2
     %input.w-full.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "text", name: "bike_request[bikes_attributes][NEW_INDEX][notes]"}
+  %td.px-3.py-2
+    %button.px-3.py-1.text-lg.font-medium.text-gray-500.underline.bg-transparent.border-0.cursor-pointer{type: "button", onclick: "removeBikeRow(this)"} Remove
