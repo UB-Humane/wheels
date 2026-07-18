@@ -1,23 +1,29 @@
 class BikeRequestsController < ApplicationController
-  before_action :set_distribution, only: [ :new, :create ]
-  before_action :check_distribution_access, only: [ :new, :create ]
+  before_action :set_distribution,          only: [ :new, :create ], if: -> { params[:distribution_id].present? }
+  before_action :check_distribution_access, only: [ :new, :create ], if: -> { params[:distribution_id].present? }
+  before_action :set_production_requester,  only: [ :new, :create ], if: -> { params[:production_id].present? }
+  before_action :check_production_access,   only: [ :new, :create ], if: -> { params[:production_id].present? }
   before_action :set_bike_request, only: [ :edit, :update, :complete_all ]
 
   def new
     @bike_request = BikeRequest.new(due_date: Date.today + 14)
     @bike_request.bikes.build
-    @production = Production.first
   end
 
   def create
-    @production = Production.first
     @bike_request = BikeRequest.new(bike_request_params)
-    @bike_request.distribution = @distribution
-    @bike_request.production = @production
+    if @distribution
+      @bike_request.distribution = @distribution
+      @bike_request.production   = Production.first
+    else
+      @bike_request.production = @production_requester
+      @bike_request.status     = :pending
+    end
     @bike_request.user = current_user
 
     if @bike_request.save
-      redirect_to tickets_distribution_path(@distribution), notice: "Bike request submitted."
+      redirect_to(@distribution ? tickets_distribution_path(@distribution) : tickets_production_path(@bike_request.production),
+                  notice: "Bike request submitted.")
     else
       render :new, status: :unprocessable_entity
     end
@@ -92,6 +98,14 @@ class BikeRequestsController < ApplicationController
     require_distribution_access(@distribution)
   end
 
+  def set_production_requester
+    @production_requester = Production.find(params[:production_id])
+  end
+
+  def check_production_access
+    require_production_access(@production_requester)
+  end
+
   def set_bike_request
     @bike_request = BikeRequest.find(params[:id])
   end
@@ -101,6 +115,7 @@ class BikeRequestsController < ApplicationController
   end
 
   def authorized_for_distribution?
+    return false if @bike_request.distribution.nil?
     current_user&.superadmin? || current_user&.distributions&.include?(@bike_request.distribution)
   end
 

@@ -88,6 +88,61 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  # --- new/create: production request ---
+
+  test "new production request requires authentication" do
+    get new_production_bike_request_path(productions(:main_production))
+    assert_redirected_to login_path
+  end
+
+  test "new production request returns 403 for distribution user" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    get new_production_bike_request_path(productions(:main_production))
+    assert_response :forbidden
+  end
+
+  test "new production request renders for production user" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get new_production_bike_request_path(productions(:main_production))
+    assert_response :success
+  end
+
+  test "create production request saves record" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    assert_difference "BikeRequest.count", 1 do
+      post production_bike_requests_path(productions(:main_production)),
+           params: { bike_request: valid_bike_request_params }
+    end
+  end
+
+  test "create production request sets status to pending" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    post production_bike_requests_path(productions(:main_production)),
+         params: { bike_request: valid_bike_request_params }
+    assert BikeRequest.last.pending?
+  end
+
+  test "create production request assigns production" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    post production_bike_requests_path(productions(:main_production)),
+         params: { bike_request: valid_bike_request_params }
+    assert_equal productions(:main_production), BikeRequest.last.production
+  end
+
+  test "create production request has no distribution" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    post production_bike_requests_path(productions(:main_production)),
+         params: { bike_request: valid_bike_request_params }
+    assert_nil BikeRequest.last.distribution
+  end
+
+  test "create production request redirects to production tickets" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    post production_bike_requests_path(productions(:main_production)),
+         params: { bike_request: valid_bike_request_params }
+    assert_redirected_to tickets_production_path(productions(:main_production))
+  end
+
   # --- edit ---
 
   test "edit requires authentication" do

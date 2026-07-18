@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_15_221111) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_18_030438) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -18,7 +18,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_15_221111) do
   create_table "bike_requests", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "denial_reason"
-    t.bigint "distribution_id", null: false
+    t.bigint "distribution_id"
     t.date "due_date", null: false
     t.string "phone", null: false
     t.bigint "production_id", null: false

@@ -1,5 +1,5 @@
 class BikeRequest < ApplicationRecord
-  belongs_to :distribution
+  belongs_to :distribution, optional: true
   belongs_to :production
   belongs_to :user
 

@@ -2,7 +2,7 @@
 .max-w-4xl
   %h1.text-3xl.font-bold.text-gray-900.mb-8 Request Bikes
 
-  = form_with model: [@distribution, @bike_request], class: "space-y-8" do |f|
+  = form_with model: (@distribution ? [@distribution, @bike_request] : [@production_requester, @bike_request]), class: "space-y-8" do |f|
     .space-y-2
       = f.label :phone, "Phone number", class: "block text-xl font-medium text-gray-900"
       = f.telephone_field :phone, placeholder: "10 digits, no hyphens", class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
@@ -40,7 +40,7 @@
 
     .flex.gap-4
       = f.submit "Submit Request", class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"
-      = link_to "Cancel", tickets_distribution_path(@distribution), class: "px-6 py-3 text-lg font-medium text-gray-900 underline"
+      = link_to "Cancel", (@distribution ? tickets_distribution_path(@distribution) : tickets_production_path(@production_requester)), class: "px-6 py-3 text-lg font-medium text-gray-900 underline"
 
   :javascript
     var bikeRowIndex = 1;
