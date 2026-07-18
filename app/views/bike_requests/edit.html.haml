@@ -3,6 +3,10 @@
   %h1.text-3xl.font-bold.text-gray-900.mb-8 Edit Bike Request
 
   = form_with model: @bike_request, class: "space-y-8" do |f|
+    - if @bike_request.errors.any?
+      .mb-4.space-y-1
+        - @bike_request.errors.full_messages.each do |msg|
+          %p.text-lg.text-red-700= msg
     .space-y-2
       = f.label :phone, "Phone number", class: "block text-xl font-medium text-gray-900"
       = f.telephone_field :phone, placeholder: "10 digits, no hyphens", class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"

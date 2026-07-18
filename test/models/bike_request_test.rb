@@ -10,7 +10,7 @@ class BikeRequestTest < ActiveSupport::TestCase
       production: productions(:main_production),
       user: users(:dist_user)
     )
-    br.bikes.build(bike_type: :any)
+    br.bikes.build(bike_type: :male)
     br
   end
 

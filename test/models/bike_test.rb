@@ -3,9 +3,9 @@ require "test_helper"
 class BikeTest < ActiveSupport::TestCase
   # --- defaults and enum ---
 
-  test "default bike_type is any" do
+  test "default bike_type is male" do
     bike = Bike.new(bike_request: bike_requests(:requested_bike))
-    assert bike.any?
+    assert bike.male?
   end
 
   test "default completed is false" do
@@ -13,12 +13,19 @@ class BikeTest < ActiveSupport::TestCase
     assert_not bike.completed
   end
 
-  test "bike_type any is valid" do
-    assert bikes(:requested_bike_bike).any?
+  test "bike_type male is valid" do
+    assert bikes(:requested_bike_bike).male?
   end
 
-  test "bike_type male is valid" do
-    assert bikes(:completed_bike_bike_one).male?
+  test "age is required when bike_type is kid" do
+    bike = Bike.new(bike_request: bike_requests(:requested_bike), bike_type: :kid, age: nil)
+    assert_not bike.valid?
+    assert_includes bike.errors[:age], "can't be blank"
+  end
+
+  test "age is not required for non-kid types" do
+    bike = Bike.new(bike_request: bike_requests(:requested_bike), bike_type: :male, age: nil)
+    assert bike.valid?
   end
 
   test "bike_type female can be set" do

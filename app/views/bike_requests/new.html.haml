@@ -3,20 +3,30 @@
   %h1.text-3xl.font-bold.text-gray-900.mb-8 Request Bikes
 
   = form_with model: (@distribution ? [@distribution, @bike_request] : [@production_requester, @bike_request]), class: "space-y-8" do |f|
+    - if @bike_request.errors.any?
+      .mb-4.space-y-1
+        - @bike_request.errors.full_messages.each do |msg|
+          %p.text-lg.text-red-700= msg
     .space-y-2
-      = f.label :phone, "Phone number", class: "block text-xl font-medium text-gray-900"
+      = f.label :phone, class: "block text-xl font-medium text-gray-900" do
+        Phone number
+        %span.text-red-600 *
       = f.telephone_field :phone, placeholder: "10 digits, no hyphens", class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
       - @bike_request.errors[:phone].each do |msg|
         %p.text-lg.text-red-700= msg
 
     .space-y-2
-      = f.label :requestor_name, "Requestor name", class: "block text-xl font-medium text-gray-900"
+      = f.label :requestor_name, class: "block text-xl font-medium text-gray-900" do
+        Requestor name
+        %span.text-red-600 *
       = f.text_field :requestor_name, class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
       - @bike_request.errors[:requestor_name].each do |msg|
         %p.text-lg.text-red-700= msg
 
     .space-y-2
-      = f.label :due_date, "Due date", class: "block text-xl font-medium text-gray-900"
+      = f.label :due_date, class: "block text-xl font-medium text-gray-900" do
+        Due date
+        %span.text-red-600 *
       = f.date_field :due_date, class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
       - @bike_request.errors[:due_date].each do |msg|
         %p.text-lg.text-red-700= msg
@@ -62,18 +72,33 @@
       tr.innerHTML = html;
       tbody.appendChild(tr);
     }
+    function validateAge(row) {
+      var sel = row.querySelector('select[name*="[bike_type]"]');
+      var age = row.querySelector('input[name*="[age]"]');
+      if (!sel || !age) return;
+      var isKid = sel.value === 'kid';
+      var val = age.value;
+      var num = parseInt(val);
+      var invalid = isKid && (val === '' || num < 1 || num > 18);
+      age.classList.toggle('border-red-600', invalid);
+      age.classList.toggle('border-gray-400', !invalid);
+    }
+    function onTypeChange(sel) { validateAge(sel.closest('tr')); }
+    function onAgeInput(input) { validateAge(input.closest('tr')); }
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('#bikes-tbody tr').forEach(validateAge);
+    });
 
 %template#bike-row-template
   %td.px-3.py-2
     %input.w-full.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "text", name: "bike_request[bikes_attributes][NEW_INDEX][name]", placeholder: "optional"}
   %td.px-3.py-2
-    %select.px-2.py-1.text-lg.border-2.border-gray-400.bg-white{name: "bike_request[bikes_attributes][NEW_INDEX][bike_type]"}
-      %option{value: "any"} Any
+    %select.px-2.py-1.text-lg.border-2.border-gray-400.bg-white{name: "bike_request[bikes_attributes][NEW_INDEX][bike_type]", onchange: "onTypeChange(this)"}
       %option{value: "male"} Male
       %option{value: "female"} Female
       %option{value: "kid"} Kid
   %td.px-3.py-2
-    %input.w-20.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "number", name: "bike_request[bikes_attributes][NEW_INDEX][age]", min: "1", max: "120"}
+    %input.w-20.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "number", name: "bike_request[bikes_attributes][NEW_INDEX][age]", min: "1", max: "18", oninput: "onAgeInput(this)"}
   %td.px-3.py-2
     %input.w-28.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "text", name: "bike_request[bikes_attributes][NEW_INDEX][height]", placeholder: "5'4\""}
   %td.px-3.py-2

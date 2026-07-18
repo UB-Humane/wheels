@@ -1,8 +1,10 @@
 class Bike < ApplicationRecord
   belongs_to :bike_request
 
-  TYPES = %w[any male female kid].freeze
-  enum :bike_type, { any: 0, male: 1, female: 2, kid: 3 }, default: :any
+  TYPES = %w[male female kid].freeze
+  enum :bike_type, { male: 1, female: 2, kid: 3 }, default: :male
+
+  validates :age, presence: true, if: :kid?
 
   after_update :sync_request_status, if: :saved_change_to_completed?
 

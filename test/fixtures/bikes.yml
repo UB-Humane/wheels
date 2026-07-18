@@ -1,6 +1,6 @@
 requested_bike_bike:
   bike_request: requested_bike
-  bike_type: 0
+  bike_type: 1
   completed: false
 
 completed_bike_bike_one:
@@ -10,12 +10,12 @@ completed_bike_bike_one:
 
 completed_bike_bike_two:
   bike_request: completed_bike
-  bike_type: 0
+  bike_type: 1
   completed: true
 
 pending_bike_bike:
   bike_request: pending_bike
-  bike_type: 0
+  bike_type: 1
   completed: false
 
 denied_bike_bike:
