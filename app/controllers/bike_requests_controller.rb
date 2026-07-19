@@ -126,10 +126,10 @@ class BikeRequestsController < ApplicationController
   end
 
   def bike_request_params
-    params.require(:bike_request).permit(
-      :phone, :requestor_name, :due_date,
-      bikes_attributes: [ :name, :bike_type, :age, :height, :notes ]
-    )
+    permitted = [ :phone, :requestor_name, :due_date,
+                  { bikes_attributes: [ :name, :bike_type, :age, :height, :notes ] } ]
+    permitted.unshift(:owner_id) if @production_requester.present?
+    params.require(:bike_request).permit(*permitted)
   end
 
   def resubmit_params

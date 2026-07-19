@@ -12,7 +12,7 @@ class ProductionsController < ApplicationController
     @tab = params[:tab].presence_in(%w[requested pending ready_for_delivery delivered distributed archived]) || "requested"
     @tab_counts = @production.bike_requests.group(:status).count
     scope = @production.bike_requests.where(status: @tab)
-                    .includes(:distribution, :user, :bikes)
+                    .includes(:distribution, :user, :bikes, :owner)
                     .order(due_date: :asc)
     @pagy, @bike_requests = pagy(scope, limit: 20)
   end

@@ -143,6 +143,20 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to tickets_production_path(productions(:main_production))
   end
 
+  test "create production request saves owner" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    post production_bike_requests_path(productions(:main_production)),
+         params: { bike_request: valid_bike_request_params.merge(owner_id: users(:prod_admin).id) }
+    assert_equal users(:prod_admin), BikeRequest.last.owner
+  end
+
+  test "create distribution request ignores owner_id param" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    post distribution_bike_requests_path(distributions(:downtown_dist)),
+         params: { bike_request: valid_bike_request_params.merge(owner_id: users(:prod_admin).id) }
+    assert_nil BikeRequest.last.owner
+  end
+
   # --- edit ---
 
   test "edit requires authentication" do

@@ -1,4 +1,6 @@
 class BikeRequest < ApplicationRecord
+  MAX_BIKES = 15
+
   belongs_to :distribution, optional: true
   belongs_to :production
   belongs_to :user
