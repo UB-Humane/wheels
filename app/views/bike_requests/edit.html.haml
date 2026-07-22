@@ -28,6 +28,14 @@
     %div{data: { controller: "bike-form",
                  "bike-form-max-bikes-value": BikeRequest::MAX_BIKES,
                  "bike-form-row-index-value": @bike_request.bikes.size }}
+      .space-y-2.mb-4
+        %label.block.text-xl.font-medium.text-gray-900
+          How many bikes?
+          %span.text-red-600 *
+        %input.w-32.px-4.py-3.text-xl.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{
+          type: "number", min: "1", max: BikeRequest::MAX_BIKES, value: [@bike_request.bikes.size, 1].max, required: true,
+          data: { "bike-form-target": "countInput", action: "input->bike-form#setCount" }
+        }
       %p.text-xl.font-semibold.text-gray-900.mb-3 Bikes
       .overflow-x-auto
         %table.w-full.border-collapse
@@ -60,9 +68,6 @@
                 %td.px-3.py-2
                   = bf.hidden_field :_destroy, value: false, class: "destroy-field"
                   %button.px-3.py-1.text-lg.font-medium.text-gray-500.underline.bg-transparent.border-0.cursor-pointer{type: "button", data: { action: "click->bike-form#removeBike" }} Remove
-      %button.mt-3.px-4.py-2.text-lg.font-medium.text-gray-900.border-2.border-gray-400.hover:border-gray-900.transition-colors{
-        type: "button", data: { "bike-form-target": "addButton", action: "click->bike-form#addBike" }
-      } + Add bike
 
     .flex.gap-4
       = f.submit "Resubmit for Approval", class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"

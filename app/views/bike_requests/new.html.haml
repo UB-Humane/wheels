@@ -52,6 +52,14 @@
                  "bike-form-max-bikes-value": BikeRequest::MAX_BIKES,
                  "bike-form-row-index-value": 1,
                  "bike-form-validate-age-value": true }}
+      .space-y-2.mb-4
+        %label.block.text-xl.font-medium.text-gray-900
+          How many bikes?
+          %span.text-red-600 *
+        %input.w-32.px-4.py-3.text-xl.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{
+          type: "number", min: "1", max: BikeRequest::MAX_BIKES, value: 1, required: true,
+          data: { "bike-form-target": "countInput", action: "input->bike-form#setCount" }
+        }
       %p.text-xl.font-semibold.text-gray-900.mb-3 Bikes
       .overflow-x-auto
         %table.w-full.border-collapse
@@ -66,9 +74,6 @@
           %tbody{data: { "bike-form-target": "tbody" }}
             = f.fields_for :bikes do |bf|
               = render "bike_form_row", bf: bf
-      %button.mt-3.px-4.py-2.text-lg.font-medium.text-gray-900.border-2.border-gray-400.hover:border-gray-900.transition-colors{
-        type: "button", data: { "bike-form-target": "addButton", action: "click->bike-form#addBike" }
-      } + Add bike
 
     .flex.gap-4
       - if @production_requester

@@ -1,26 +1,56 @@
 import { Controller } from "@hotwired/stimulus"
 
+const MIN_BIKES = 1
+
 export default class extends Controller {
-  static targets = ["tbody", "addButton"]
+  static targets = ["tbody", "countInput"]
   static values  = { maxBikes: Number, rowIndex: Number, validateAge: Boolean }
 
   connect() {
     if (this.validateAgeValue)
       this.tbodyTarget.querySelectorAll("tr").forEach(r => this._checkAge(r))
-    this._updateAddBtn()
+    this._syncCountInput()
   }
 
-  addBike() {
+  setCount() {
+    let n = parseInt(this.countInputTarget.value, 10)
+    if (isNaN(n)) n = MIN_BIKES
+    n = Math.max(MIN_BIKES, Math.min(this.maxBikesValue, n))
+    this.countInputTarget.value = n
+
+    const current = this._countActive()
+    if (n > current) {
+      for (let i = current; i < n; i++) this._addRow()
+    } else if (n < current) {
+      this._removeTrailing(current - n)
+    }
+  }
+
+  removeBike(event) {
+    if (this._countActive() <= MIN_BIKES) return
+    this._destroyRow(event.target.closest("tr"))
+    this._syncCountInput()
+  }
+
+  validateAgeField(event) {
+    this._checkAge(event.target.closest("tr"))
+  }
+
+  _addRow() {
     const tpl = document.getElementById("bike-row-template")
     const html = tpl.innerHTML.replace(/NEW_INDEX/g, this.rowIndexValue++)
     const tr = document.createElement("tr")
     tr.innerHTML = html
     this.tbodyTarget.appendChild(tr)
-    this._updateAddBtn()
   }
 
-  removeBike(event) {
-    const row = event.target.closest("tr")
+  _removeTrailing(count) {
+    const rows = Array.from(this.tbodyTarget.querySelectorAll("tr"))
+      .filter(r => r.style.display !== "none")
+    rows.slice(-count).forEach(r => this._destroyRow(r))
+  }
+
+  _destroyRow(row) {
     const destroy = row.querySelector(".destroy-field")
     if (destroy) {
       destroy.value = "1"
@@ -28,11 +58,6 @@ export default class extends Controller {
     } else {
       row.remove()
     }
-    this._updateAddBtn()
-  }
-
-  validateAgeField(event) {
-    this._checkAge(event.target.closest("tr"))
   }
 
   _checkAge(row) {
@@ -51,10 +76,7 @@ export default class extends Controller {
       .filter(r => r.style.display !== "none").length
   }
 
-  _updateAddBtn() {
-    const full = this._countActive() >= this.maxBikesValue
-    this.addButtonTarget.disabled = full
-    this.addButtonTarget.classList.toggle("opacity-50", full)
-    this.addButtonTarget.classList.toggle("cursor-not-allowed", full)
+  _syncCountInput() {
+    if (this.hasCountInputTarget) this.countInputTarget.value = this._countActive()
   }
 }
