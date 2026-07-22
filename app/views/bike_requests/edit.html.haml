@@ -25,7 +25,9 @@
       - @bike_request.errors[:due_date].each do |msg|
         %p.text-lg.text-red-700= msg
 
-    %div
+    %div{data: { controller: "bike-form",
+                 "bike-form-max-bikes-value": BikeRequest::MAX_BIKES,
+                 "bike-form-row-index-value": @bike_request.bikes.size }}
       %p.text-xl.font-semibold.text-gray-900.mb-3 Bikes
       .overflow-x-auto
         %table.w-full.border-collapse
@@ -37,7 +39,7 @@
               %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-900 Height
               %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-900 Notes
               %th
-          %tbody#bikes-tbody
+          %tbody{data: { "bike-form-target": "tbody" }}
             = f.fields_for :bikes do |bf|
               %tr.bike-row
                 %td.px-3.py-2
@@ -57,33 +59,14 @@
                       class: "w-full px-2 py-1 text-lg border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
                 %td.px-3.py-2
                   = bf.hidden_field :_destroy, value: false, class: "destroy-field"
-                  %button.px-3.py-1.text-lg.font-medium.text-gray-500.underline.bg-transparent.border-0.cursor-pointer{type: "button", onclick: "removeBikeRow(this)"} Remove
-      %button.mt-3.px-4.py-2.text-lg.font-medium.text-gray-900.border-2.border-gray-400.hover:border-gray-900.transition-colors{type: "button", onclick: "addBikeRow()"} + Add bike
+                  %button.px-3.py-1.text-lg.font-medium.text-gray-500.underline.bg-transparent.border-0.cursor-pointer{type: "button", data: { action: "click->bike-form#removeBike" }} Remove
+      %button.mt-3.px-4.py-2.text-lg.font-medium.text-gray-900.border-2.border-gray-400.hover:border-gray-900.transition-colors{
+        type: "button", data: { "bike-form-target": "addButton", action: "click->bike-form#addBike" }
+      } + Add bike
 
     .flex.gap-4
       = f.submit "Resubmit for Approval", class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"
       = link_to "Cancel", tickets_distribution_path(@bike_request.distribution), class: "px-6 py-3 text-lg font-medium text-gray-900 underline"
-
-  :javascript
-    var bikeRowIndex = #{@bike_request.bikes.size};
-    function addBikeRow() {
-      var tbody = document.getElementById('bikes-tbody');
-      var html = document.getElementById('bike-row-template').innerHTML
-        .replace(/NEW_INDEX/g, bikeRowIndex++);
-      var tr = document.createElement('tr');
-      tr.innerHTML = html;
-      tbody.appendChild(tr);
-    }
-    function removeBikeRow(btn) {
-      var row = btn.closest('tr');
-      var destroyField = row.querySelector('.destroy-field');
-      if (destroyField) {
-        destroyField.value = '1';
-        row.style.display = 'none';
-      } else {
-        row.remove();
-      }
-    }
 
 %template#bike-row-template
   %td.px-3.py-2
@@ -101,4 +84,4 @@
   %td.px-3.py-2
     %input.w-full.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "text", name: "bike_request[bikes_attributes][NEW_INDEX][notes]"}
   %td.px-3.py-2
-    %button.px-3.py-1.text-lg.font-medium.text-gray-500.underline.bg-transparent.border-0.cursor-pointer{type: "button", onclick: "removeBikeRow(this)"} Remove
+    %button.px-3.py-1.text-lg.font-medium.text-gray-500.underline.bg-transparent.border-0.cursor-pointer{type: "button", data: { action: "click->bike-form#removeBike" }} Remove

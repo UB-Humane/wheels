@@ -1,46 +1,3 @@
-:javascript
-  function printAllBikeLabels(bikes, requestor, phone, due) {
-    var pages = [];
-    bikes.forEach(function(b) {
-      var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4];
-      var lines = [];
-      if (name) lines.push('<p style="font-size:18pt;font-weight:bold;margin:0">' + name + '</p>');
-      var detail = type;
-      if (age) detail += ' &middot; Age ' + age;
-      if (height) detail += ' &middot; ' + height;
-      lines.push('<p style="font-size:14pt;margin:4px 0">' + detail + '</p>');
-      if (notes) lines.push('<p style="font-size:12pt;margin:4px 0">' + notes + '</p>');
-      lines.push('<p style="font-size:11pt;color:#555;margin:8px 0 0">' + requestor + ' &middot; ' + phone + '</p>');
-      lines.push('<p style="font-size:11pt;color:#555;margin:2px 0">Due ' + due + '</p>');
-      pages.push('<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') + 'padding:12px">' + lines.join('') + '</div>');
-    });
-    var win = window.open('', '_blank', 'width=400,height=600');
-    win.document.write('<html><body style="font-family:sans-serif;margin:0">' + pages.join('') + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>');
-    win.document.close();
-  }
-  function printCard(bikes, requestor, phone, due) {
-    var rows = '';
-    bikes.forEach(function(b, i) {
-      var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4];
-      var specs = [type, age ? 'Age ' + age : '', height].filter(Boolean).join(' · ');
-      rows += '<tr style="border-bottom:1px solid #ddd">';
-      rows += '<td style="padding:8px 10px;font-size:13pt;color:#888;vertical-align:top">' + (i + 1) + '</td>';
-      rows += '<td style="padding:8px 10px;vertical-align:top">';
-      if (name) rows += '<div style="font-size:15pt;font-weight:bold;margin-bottom:2px">' + name + '</div>';
-      rows += '<div style="font-size:13pt;color:#333">' + specs + '</div>';
-      if (notes) rows += '<div style="font-size:12pt;color:#666;margin-top:3px">' + notes + '</div>';
-      rows += '</td></tr>';
-    });
-    var html =
-      '<div style="border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:14px">' +
-        '<div style="font-size:18pt;font-weight:bold">' + requestor + '</div>' +
-        '<div style="font-size:13pt;color:#555;margin-top:3px">' + phone + ' &nbsp;&middot;&nbsp; Due ' + due + '</div>' +
-      '</div>' +
-      '<table style="width:100%;border-collapse:collapse">' + rows + '</table>';
-    var win = window.open('', '_blank', 'width=700,height=1000');
-    win.document.write('<html><body style="font-family:sans-serif;padding:20px;max-width:660px">' + html + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>');
-    win.document.close();
-  }
 - tabs = %w[requested pending ready_for_delivery delivered distributed archived]
 .flex.border-b-2.border-gray-900.mb-8
   - tabs.each do |tab|
@@ -52,7 +9,12 @@
   .space-y-4
     - bike_requests.each do |req|
       - card_border = req.denied? ? "border-2 border-red-600" : "border-2 border-gray-900"
-      .px-6.py-5.space-y-4{class: card_border}
+      .px-6.py-5.space-y-4{class: card_border,
+        data: { controller: "print",
+                "print-bikes-value":     req.bikes_label_data.to_json,
+                "print-requestor-value": req.requestor_name,
+                "print-phone-value":     req.phone,
+                "print-due-value":       req.due_date.strftime("%-m/%-d/%Y") }}
         .flex.items-start.justify-between.gap-4
           .space-y-1
             %p.text-2xl.font-bold.text-gray-900= req.distribution&.name || "Production Request"
@@ -102,25 +64,23 @@
         .flex.gap-4.mt-2
           - if production_view
             - if req.requested?
-              = form_with url: bike_request_path(req), method: :patch, class: "flex items-center gap-3" do |f|
+              - owner_search_data = { controller: "owner-search", action: "click@window->owner-search#closeDropdown", "owner-search-production-id-value" => req.production.id }
+              = form_with url: bike_request_path(req), method: :patch, class: "flex items-center gap-3", data: owner_search_data do |f|
                 = hidden_field_tag :status, "approve"
-                = hidden_field_tag :owner_id, "", id: "owner-id-#{req.id}"
+                = hidden_field_tag :owner_id, "", data: { "owner-search-target": "hidden" }
                 .relative
                   %input.px-3.py-2.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{
                     type: "text", autocomplete: "off",
-                    id: "owner-search-#{req.id}",
-                    placeholder: "Assign to..."
+                    placeholder: "Assign to...",
+                    data: { "owner-search-target": "input", action: "input->owner-search#search" }
                   }
                   %ul.absolute.z-10.bg-white.border-2.border-gray-900.w-full.p-0.m-0{
-                    id: "owner-drop-#{req.id}", hidden: true, style: "max-height:200px;overflow-y:auto"
+                    hidden: true, style: "max-height:200px;overflow-y:auto",
+                    data: { "owner-search-target": "dropdown" }
                   }
                 = submit_tag "Approve", disabled: true,
-                    id: "approve-btn-#{req.id}",
-                    class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 transition-colors border-0 opacity-50 cursor-not-allowed"
-              :javascript
-                document.addEventListener('DOMContentLoaded', function() {
-                  window.setupOwnerSearch('owner-search-#{req.id}', 'owner-id-#{req.id}', 'owner-drop-#{req.id}', 'approve-btn-#{req.id}', #{req.production.id});
-                });
+                    class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 transition-colors border-0 opacity-50 cursor-not-allowed",
+                    data: { "owner-search-target": "button" }
               = form_with url: bike_request_path(req), method: :patch, class: "flex gap-2 items-center" do |f|
                 = hidden_field_tag :status, "deny"
                 = text_field_tag :denial_reason, nil, placeholder: "Reason (optional)", class: "px-3 py-2 text-lg border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
@@ -147,8 +107,8 @@
             = button_to "Mark Distributed", bike_request_path(req), method: :patch, params: { status: "distributed" },
                 class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
           - if production_view && !req.requested? && !req.archived?
-            %button.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer.self-center{type: "button", onclick: "printAllBikeLabels(#{req.bikes_label_data.to_json}, #{req.requestor_name.to_json}, #{req.phone.to_json}, #{req.due_date.strftime('%-m/%-d/%Y').to_json})"} Print All
-            %button.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer.self-center{type: "button", onclick: "printCard(#{req.bikes_label_data.to_json}, #{req.requestor_name.to_json}, #{req.phone.to_json}, #{req.due_date.strftime('%-m/%-d/%Y').to_json})"} Print Overview
+            %button.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer.self-center{type: "button", data: { action: "click->print#printLabels" }} Print All
+            %button.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer.self-center{type: "button", data: { action: "click->print#printCard" }} Print Overview
 
   - if pagy.pages > 1
     .flex.items-center.gap-6.mt-8.text-lg

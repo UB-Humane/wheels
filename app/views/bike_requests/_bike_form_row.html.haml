@@ -4,11 +4,11 @@
         class: "w-full px-2 py-1 text-lg border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
   %td.px-3.py-2
     = bf.select :bike_type, [["Male", "male"], ["Female", "female"], ["Kid", "kid"]],
-        {}, class: "px-2 py-1 text-lg border-2 border-gray-400 bg-white", onchange: "onTypeChange(this)"
+        {}, class: "px-2 py-1 text-lg border-2 border-gray-400 bg-white", data: { action: "change->bike-form#validateAgeField" }
   %td.px-3.py-2
     = bf.number_field :age, min: 1, max: 18,
         class: "w-20 px-2 py-1 text-lg border-2 border-gray-400 focus:border-gray-900 focus:outline-none",
-        oninput: "onAgeInput(this)"
+        data: { action: "input->bike-form#validateAgeField" }
   %td.px-3.py-2
     = bf.text_field :height, placeholder: "5'4\"",
         class: "w-28 px-2 py-1 text-lg border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
@@ -16,4 +16,4 @@
     = bf.text_field :notes,
         class: "w-full px-2 py-1 text-lg border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
   %td.px-3.py-2
-    %button.px-3.py-1.text-lg.font-medium.text-gray-500.underline.bg-transparent.border-0.cursor-pointer{type: "button", onclick: "removeBikeRow(this)"} Remove
+    %button.px-3.py-1.text-lg.font-medium.text-gray-500.underline.bg-transparent.border-0.cursor-pointer{type: "button", data: { action: "click->bike-form#removeBike" }} Remove

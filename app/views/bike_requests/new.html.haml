@@ -2,7 +2,8 @@
 .max-w-4xl
   %h1.text-3xl.font-bold.text-gray-900.mb-8 Request Bikes
 
-  = form_with model: (@distribution ? [@distribution, @bike_request] : [@production_requester, @bike_request]), class: "space-y-8" do |f|
+  - owner_search_data = @production_requester ? { controller: "owner-search", action: "click@window->owner-search#closeDropdown", "owner-search-production-id-value" => @production_requester.id } : {}
+  = form_with model: (@distribution ? [@distribution, @bike_request] : [@production_requester, @bike_request]), class: "space-y-8", data: owner_search_data do |f|
     - if @bike_request.errors.any?
       .mb-4.space-y-1
         - @bike_request.errors.full_messages.each do |msg|
@@ -37,15 +38,20 @@
           Owner
           %span.text-red-600 *
         .relative
-          %input#new-owner-search.w-full.px-4.py-3.text-xl.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{
-            type: "text", autocomplete: "off", placeholder: "Search by name or email..."
+          %input.w-full.px-4.py-3.text-xl.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{
+            type: "text", autocomplete: "off", placeholder: "Search by name or email...",
+            data: { "owner-search-target": "input", action: "input->owner-search#search" }
           }
-          %ul#new-owner-drop.absolute.z-10.bg-white.border-2.border-gray-900.w-full.p-0.m-0{
-            hidden: true, style: "max-height:200px;overflow-y:auto"
+          %ul.absolute.z-10.bg-white.border-2.border-gray-900.w-full.p-0.m-0{
+            hidden: true, style: "max-height:200px;overflow-y:auto",
+            data: { "owner-search-target": "dropdown" }
           }
-        %input#new-owner-id{type: "hidden", name: "bike_request[owner_id]"}
+        %input{type: "hidden", name: "bike_request[owner_id]", data: { "owner-search-target": "hidden" }}
 
-    %div
+    %div{data: { controller: "bike-form",
+                 "bike-form-max-bikes-value": BikeRequest::MAX_BIKES,
+                 "bike-form-row-index-value": 1,
+                 "bike-form-validate-age-value": true }}
       %p.text-xl.font-semibold.text-gray-900.mb-3 Bikes
       .overflow-x-auto
         %table.w-full.border-collapse
@@ -57,90 +63,35 @@
               %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-900 Height
               %th.text-left.px-3.py-2.text-lg.font-semibold.text-gray-900 Notes
               %th
-          %tbody#bikes-tbody
+          %tbody{data: { "bike-form-target": "tbody" }}
             = f.fields_for :bikes do |bf|
               = render "bike_form_row", bf: bf
-      %button#add-bike-btn.mt-3.px-4.py-2.text-lg.font-medium.text-gray-900.border-2.border-gray-400.hover:border-gray-900.transition-colors{type: "button", onclick: "addBikeRow()"} + Add bike
+      %button.mt-3.px-4.py-2.text-lg.font-medium.text-gray-900.border-2.border-gray-400.hover:border-gray-900.transition-colors{
+        type: "button", data: { "bike-form-target": "addButton", action: "click->bike-form#addBike" }
+      } + Add bike
 
     .flex.gap-4
       - if @production_requester
-        = f.submit "Submit Request", id: "new-submit-btn", disabled: true,
-            class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 transition-colors opacity-50 cursor-not-allowed"
+        = f.submit "Submit Request", disabled: true,
+            class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 transition-colors opacity-50 cursor-not-allowed",
+            data: { "owner-search-target": "button" }
       - else
         = f.submit "Submit Request", class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"
       = link_to "Cancel", (@distribution ? tickets_distribution_path(@distribution) : tickets_production_path(@production_requester)), class: "px-6 py-3 text-lg font-medium text-gray-900 underline"
-
-  :javascript
-    var bikeRowIndex = 1;
-    var MAX_BIKES = #{BikeRequest::MAX_BIKES};
-    function countActiveBikes() {
-      return Array.from(document.getElementById('bikes-tbody').querySelectorAll('tr'))
-        .filter(function(r) { return r.style.display !== 'none'; }).length;
-    }
-    function updateAddBikeBtn() {
-      var btn = document.getElementById('add-bike-btn');
-      var full = countActiveBikes() >= MAX_BIKES;
-      btn.disabled = full;
-      btn.classList.toggle('opacity-50', full);
-      btn.classList.toggle('cursor-not-allowed', full);
-    }
-    function removeBikeRow(btn) {
-      var row = btn.closest('tr');
-      var destroyField = row.querySelector('.destroy-field');
-      if (destroyField) {
-        destroyField.value = '1';
-        row.style.display = 'none';
-      } else {
-        row.remove();
-      }
-      updateAddBikeBtn();
-    }
-    function addBikeRow() {
-      var tbody = document.getElementById('bikes-tbody');
-      var html = document.getElementById('bike-row-template').innerHTML
-        .replace(/NEW_INDEX/g, bikeRowIndex++);
-      var tr = document.createElement('tr');
-      tr.innerHTML = html;
-      tbody.appendChild(tr);
-      updateAddBikeBtn();
-    }
-    function validateAge(row) {
-      var sel = row.querySelector('select[name*="[bike_type]"]');
-      var age = row.querySelector('input[name*="[age]"]');
-      if (!sel || !age) return;
-      var isKid = sel.value === 'kid';
-      var val = age.value;
-      var num = parseInt(val);
-      var invalid = isKid && (val === '' || num < 1 || num > 18);
-      age.classList.toggle('border-red-600', invalid);
-      age.classList.toggle('border-gray-400', !invalid);
-    }
-    function onTypeChange(sel) { validateAge(sel.closest('tr')); }
-    function onAgeInput(input) { validateAge(input.closest('tr')); }
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('#bikes-tbody tr').forEach(validateAge);
-      updateAddBikeBtn();
-    });
-
-- if @production_requester
-  :javascript
-    document.addEventListener('DOMContentLoaded', function() {
-      window.setupOwnerSearch('new-owner-search', 'new-owner-id', 'new-owner-drop', 'new-submit-btn', #{@production_requester.id});
-    });
 
 %template#bike-row-template
   %td.px-3.py-2
     %input.w-full.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "text", name: "bike_request[bikes_attributes][NEW_INDEX][name]", placeholder: "optional"}
   %td.px-3.py-2
-    %select.px-2.py-1.text-lg.border-2.border-gray-400.bg-white{name: "bike_request[bikes_attributes][NEW_INDEX][bike_type]", onchange: "onTypeChange(this)"}
+    %select.px-2.py-1.text-lg.border-2.border-gray-400.bg-white{name: "bike_request[bikes_attributes][NEW_INDEX][bike_type]", data: { action: "change->bike-form#validateAgeField" }}
       %option{value: "male"} Male
       %option{value: "female"} Female
       %option{value: "kid"} Kid
   %td.px-3.py-2
-    %input.w-20.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "number", name: "bike_request[bikes_attributes][NEW_INDEX][age]", min: "1", max: "18", oninput: "onAgeInput(this)"}
+    %input.w-20.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "number", name: "bike_request[bikes_attributes][NEW_INDEX][age]", min: "1", max: "18", data: { action: "input->bike-form#validateAgeField" }}
   %td.px-3.py-2
     %input.w-28.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "text", name: "bike_request[bikes_attributes][NEW_INDEX][height]", placeholder: "5'4\""}
   %td.px-3.py-2
     %input.w-full.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "text", name: "bike_request[bikes_attributes][NEW_INDEX][notes]"}
   %td.px-3.py-2
-    %button.px-3.py-1.text-lg.font-medium.text-gray-500.underline.bg-transparent.border-0.cursor-pointer{type: "button", onclick: "removeBikeRow(this)"} Remove
+    %button.px-3.py-1.text-lg.font-medium.text-gray-500.underline.bg-transparent.border-0.cursor-pointer{type: "button", data: { action: "click->bike-form#removeBike" }} Remove
