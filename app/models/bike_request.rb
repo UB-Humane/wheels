@@ -20,6 +20,10 @@ class BikeRequest < ApplicationRecord
     bikes.map(&:label_data)
   end
 
+  def overdue?
+    due_date.present? && due_date < Date.today && (requested? || pending? || ready_for_delivery?)
+  end
+
   private
 
   def due_date_in_future

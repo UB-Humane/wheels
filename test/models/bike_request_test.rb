@@ -106,4 +106,52 @@ class BikeRequestTest < ActiveSupport::TestCase
     br = bike_requests(:requested_bike)
     assert_respond_to br, :bikes
   end
+
+  test "pending request with past due_date is overdue" do
+    br = bike_requests(:pending_bike)
+    br.update_column(:due_date, Date.today - 1)
+    assert br.overdue?
+  end
+
+  test "ready_for_delivery request with past due_date is overdue" do
+    br = bike_requests(:completed_bike)
+    br.update_column(:due_date, Date.today - 1)
+    assert br.overdue?
+  end
+
+  test "pending request with future due_date is not overdue" do
+    br = bike_requests(:pending_bike)
+    assert_not br.overdue?
+  end
+
+  test "requested request with past due_date is overdue" do
+    br = bike_requests(:requested_bike)
+    br.update_column(:due_date, Date.today - 1)
+    assert br.overdue?
+  end
+
+  test "delivered request with past due_date is not overdue" do
+    br = bike_requests(:pending_bike)
+    br.update_column(:due_date, Date.today - 1)
+    br.update!(status: :delivered)
+    assert_not br.overdue?
+  end
+
+  test "denied request with past due_date is not overdue" do
+    br = bike_requests(:denied_bike)
+    br.update_column(:due_date, Date.today - 1)
+    assert_not br.overdue?
+  end
+
+  test "archived request with past due_date is not overdue" do
+    br = bike_requests(:archived_bike)
+    br.update_column(:due_date, Date.today - 1)
+    assert_not br.overdue?
+  end
+
+  test "pending request due today is not overdue" do
+    br = bike_requests(:pending_bike)
+    br.update_column(:due_date, Date.today)
+    assert_not br.overdue?
+  end
 end
