@@ -258,32 +258,32 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert br.reload.distributed?
   end
 
-  test "update ready_for_delivery sets status to ready_for_delivery" do
-    post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "ready_for_delivery" }
-    assert bike_requests(:pending_bike).reload.ready_for_delivery?
-  end
-
-  test "update delivered from ready_for_delivery sets status to delivered" do
+  test "update delivered from ready_for_delivery sets status to delivered for an admin" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch bike_request_path(bike_requests(:completed_bike)), params: { status: "delivered" }
     assert bike_requests(:completed_bike).reload.delivered?
   end
 
-  test "update back to ready_for_delivery from delivered" do
-    post login_path, params: { email: users(:prod_admin).email, password: "password" }
-    br = bike_requests(:completed_bike)
-    br.update_columns(status: BikeRequest.statuses[:delivered])
-    patch bike_request_path(br), params: { status: "ready_for_delivery" }
-    assert br.reload.ready_for_delivery?
+  test "update delivered from ready_for_delivery returns 403 for a plain volunteer" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
+    patch bike_request_path(bike_requests(:completed_bike)), params: { status: "delivered" }
+    assert_response :forbidden
   end
 
-  test "update back to delivered from distributed" do
+  test "update back to delivered from distributed allows an admin" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     br = bike_requests(:completed_bike)
     br.update_columns(status: BikeRequest.statuses[:distributed])
     patch bike_request_path(br), params: { status: "delivered" }
     assert br.reload.delivered?
+  end
+
+  test "update back to delivered from distributed returns 403 for a plain volunteer" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
+    br = bike_requests(:completed_bike)
+    br.update_columns(status: BikeRequest.statuses[:distributed])
+    patch bike_request_path(br), params: { status: "delivered" }
+    assert_response :forbidden
   end
 
   test "update redirects to delivery path with tab param" do
@@ -340,14 +340,63 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
-  test "update back to taken_up from delivered does not overwrite the taker" do
+  test "update back_to_taken_up from delivered does not overwrite the taker" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     br = bike_requests(:completed_bike)
     br.update_columns(status: BikeRequest.statuses[:delivered], taker_id: users(:master_mechanic_user).id)
-    patch bike_request_path(br), params: { status: "taken_up" }
+    patch bike_request_path(br), params: { status: "back_to_taken_up" }
     br.reload
     assert br.taken_up?
     assert_equal users(:master_mechanic_user), br.taker
+  end
+
+  test "update back_to_taken_up returns 403 for a plain volunteer" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
+    br = bike_requests(:completed_bike)
+    br.update_columns(status: BikeRequest.statuses[:delivered])
+    patch bike_request_path(br), params: { status: "back_to_taken_up" }
+    assert_response :forbidden
+  end
+
+  test "update back_to_taken_up allows master mechanic" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    br = bike_requests(:completed_bike)
+    br.update_columns(status: BikeRequest.statuses[:delivered])
+    patch bike_request_path(br), params: { status: "back_to_taken_up" }
+    assert br.reload.taken_up?
+  end
+
+  test "update back_to_requested moves pending back to requested and is admin/master-mechanic only" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
+    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "back_to_requested" }
+    assert_response :forbidden
+
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:pending_bike)), params: { status: "back_to_requested" }
+    assert bike_requests(:pending_bike).reload.requested?
+    assert_redirected_to tickets_production_path(productions(:main_production), tab: "requested")
+  end
+
+  test "update back_to_pending moves ready_for_delivery back to pending and is admin/master-mechanic only" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
+    patch bike_request_path(bike_requests(:completed_bike)), params: { status: "back_to_pending" }
+    assert_response :forbidden
+
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:completed_bike)), params: { status: "back_to_pending" }
+    assert bike_requests(:completed_bike).reload.pending?
+    assert_redirected_to tickets_production_path(productions(:main_production), tab: "pending")
+  end
+
+  test "update back_to_ready_for_delivery moves taken_up back to ready_for_delivery and is admin/master-mechanic only" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
+    patch bike_request_path(bike_requests(:taken_up_bike)), params: { status: "back_to_ready_for_delivery" }
+    assert_response :forbidden
+
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:taken_up_bike)), params: { status: "back_to_ready_for_delivery" }
+    assert bike_requests(:taken_up_bike).reload.ready_for_delivery?
+    assert_redirected_to delivery_production_path(productions(:main_production), tab: "ready_for_delivery")
   end
 
   # --- archive / unarchive ---

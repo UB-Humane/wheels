@@ -1,4 +1,6 @@
 class BikeRequestsController < ApplicationController
+  BACK_TRANSITION_STATUSES = %w[back_to_requested back_to_pending back_to_ready_for_delivery back_to_taken_up]
+
   before_action :set_distribution,          only: [ :new, :create ], if: -> { params[:distribution_id].present? }
   before_action :check_distribution_access, only: [ :new, :create ], if: -> { params[:distribution_id].present? }
   before_action :set_production_requester,  only: [ :new, :create ], if: -> { params[:production_id].present? }
@@ -48,10 +50,17 @@ class BikeRequestsController < ApplicationController
       else
         redirect_to tickets_production_path(@bike_request.production, tab: "distributed")
       end
-    elsif params[:status].in?(%w[approve deny ready_for_delivery taken_up delivered archive unarchive])
+    elsif params[:status].in?(%w[approve deny ready_for_delivery taken_up delivered archive unarchive] + BACK_TRANSITION_STATUSES)
       return render plain: "Access denied", status: :forbidden unless authorized_for_production?
-      if params[:status] == "delivered" && @bike_request.taken_up?
-        return render plain: "Access denied", status: :forbidden unless authorized_to_complete_delivery?
+      if params[:status] == "delivered"
+        if @bike_request.taken_up?
+          return render plain: "Access denied", status: :forbidden unless authorized_to_complete_delivery?
+        else
+          return render plain: "Access denied", status: :forbidden unless authorized_for_status_correction?
+        end
+      end
+      if BACK_TRANSITION_STATUSES.include?(params[:status])
+        return render plain: "Access denied", status: :forbidden unless authorized_for_status_correction?
       end
       handle_production_update
     else
@@ -70,10 +79,14 @@ class BikeRequestsController < ApplicationController
     when "approve"      then { status: :pending, owner_id: params[:owner_id].presence }
     when "deny"         then { status: :denied, denial_reason: params[:denial_reason].presence }
     when "ready_for_delivery" then { status: :ready_for_delivery }
-    when "taken_up"     then { status: :taken_up }.merge(original_status == "ready_for_delivery" ? { taker_id: current_user.id } : {})
+    when "taken_up"     then { status: :taken_up, taker_id: current_user.id }
     when "delivered"    then { status: :delivered }
     when "archive"      then { status: :archived, status_before_archival: @bike_request.read_attribute(:status) }
     when "unarchive"    then { status: restored, status_before_archival: nil }
+    when "back_to_requested"         then { status: :requested }
+    when "back_to_pending"            then { status: :pending }
+    when "back_to_ready_for_delivery" then { status: :ready_for_delivery }
+    when "back_to_taken_up"           then { status: :taken_up }
     end
 
     if attributes && @bike_request.update(attributes)
@@ -133,6 +146,10 @@ class BikeRequestsController < ApplicationController
 
   def authorized_to_complete_delivery?
     current_user == @bike_request.taker || production_master_mechanic?(@bike_request.production)
+  end
+
+  def authorized_for_status_correction?
+    production_admin?(@bike_request.production) || production_master_mechanic?(@bike_request.production)
   end
 
   def authorized_for_distribution?
