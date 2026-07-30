@@ -2,4 +2,6 @@
 .flex.justify-start.mb-8
   = link_to "Request Bikes", new_distribution_bike_request_path(@distribution),
       class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 transition-colors"
-= render "bike_requests/list", active_tab: @tab, bike_requests: @bike_requests, pagy: @pagy, production_view: false, tab_counts: @tab_counts
+= render "bike_requests/list", active_tab: @tab, bike_requests: @bike_requests, pagy: @pagy,
+    production_view: false, tab_counts: @tab_counts,
+    tabs: %w[requested pending ready_for_delivery delivered distributed archived]

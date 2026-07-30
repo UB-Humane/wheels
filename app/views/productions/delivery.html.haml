@@ -1,0 +1,3 @@
+- content_for :title, "#{@production.name} — Delivery"
+= render "bike_requests/list", active_tab: @tab, bike_requests: @bike_requests, pagy: @pagy,
+    production_view: true, tab_counts: @tab_counts, tabs: BikeRequest::DELIVERY_STATUSES

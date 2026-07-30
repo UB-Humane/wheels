@@ -43,3 +43,12 @@ archived_bike:
   distribution: downtown_dist
   production: main_production
   user: dist_user
+
+taken_up_bike:
+  phone: "5555550044"
+  requestor_name: Frank Nguyen
+  due_date: <%= 12.days.from_now.to_date %>
+  status: 7
+  distribution: downtown_dist
+  production: main_production
+  user: dist_user

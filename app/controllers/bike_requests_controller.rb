@@ -36,7 +36,7 @@ class BikeRequestsController < ApplicationController
   def complete_all
     return render plain: "Access denied", status: :forbidden unless production_master_mechanic?(@bike_request.production)
     @bike_request.update_columns(status: BikeRequest.statuses[:ready_for_delivery]) if @bike_request.pending?
-    redirect_to tickets_production_path(@bike_request.production, tab: "ready_for_delivery")
+    redirect_to delivery_production_path(@bike_request.production, tab: "ready_for_delivery")
   end
 
   def update
@@ -48,8 +48,11 @@ class BikeRequestsController < ApplicationController
       else
         redirect_to tickets_production_path(@bike_request.production, tab: "distributed")
       end
-    elsif params[:status].in?(%w[approve deny ready_for_delivery delivered archive unarchive])
+    elsif params[:status].in?(%w[approve deny ready_for_delivery taken_up delivered archive unarchive])
       return render plain: "Access denied", status: :forbidden unless authorized_for_production?
+      if params[:status] == "delivered" && @bike_request.taken_up?
+        return render plain: "Access denied", status: :forbidden unless authorized_to_complete_delivery?
+      end
       handle_production_update
     else
       return render plain: "Access denied", status: :forbidden unless authorized_for_distribution?
@@ -61,17 +64,17 @@ class BikeRequestsController < ApplicationController
 
   def handle_production_update
     restored = BikeRequest.statuses.key(@bike_request.status_before_archival) if params[:status] == "unarchive"
+    original_status = @bike_request.status
 
     attributes = case params[:status]
     when "approve"      then { status: :pending, owner_id: params[:owner_id].presence }
     when "deny"         then { status: :denied, denial_reason: params[:denial_reason].presence }
     when "ready_for_delivery" then { status: :ready_for_delivery }
+    when "taken_up"     then { status: :taken_up }.merge(original_status == "ready_for_delivery" ? { taker_id: current_user.id } : {})
     when "delivered"    then { status: :delivered }
     when "archive"      then { status: :archived, status_before_archival: @bike_request.read_attribute(:status) }
     when "unarchive"    then { status: restored, status_before_archival: nil }
     end
-
-    original_status = @bike_request.status
 
     if attributes && @bike_request.update(attributes)
       tab = case params[:status]
@@ -81,10 +84,18 @@ class BikeRequestsController < ApplicationController
             when "unarchive" then (restored == "denied" ? "requested" : restored)
             else @bike_request.status.to_s
             end
-      redirect_to tickets_production_path(@bike_request.production, tab: tab)
+      redirect_to production_tab_path(@bike_request.production, tab)
     else
-      redirect_to tickets_production_path(@bike_request.production, tab: original_status),
+      redirect_to production_tab_path(@bike_request.production, original_status),
         alert: @bike_request.errors.full_messages.first
+    end
+  end
+
+  def production_tab_path(production, tab)
+    if BikeRequest::DELIVERY_STATUSES.include?(tab.to_s)
+      delivery_production_path(production, tab: tab)
+    else
+      tickets_production_path(production, tab: tab)
     end
   end
 
@@ -118,6 +129,10 @@ class BikeRequestsController < ApplicationController
 
   def authorized_for_production?
     current_user&.superadmin? || current_user&.productions&.include?(@bike_request.production)
+  end
+
+  def authorized_to_complete_delivery?
+    current_user == @bike_request.taker || production_master_mechanic?(@bike_request.production)
   end
 
   def authorized_for_distribution?

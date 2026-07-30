@@ -26,6 +26,7 @@ Rails.application.routes.draw do
     get :users,     on: :member
     get :inventory, on: :member
     get :members,   on: :member
+    get :delivery,  on: :member
     resources :donors,           only: [ :index, :new, :create, :edit, :update ]
     resources :bike_requests,    only: [ :new, :create ]
     resources :user_productions, only: [ :create, :update, :destroy ]

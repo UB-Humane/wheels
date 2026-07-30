@@ -286,10 +286,68 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert br.reload.delivered?
   end
 
-  test "update redirects to production path with tab param" do
+  test "update redirects to delivery path with tab param" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch bike_request_path(bike_requests(:completed_bike)), params: { status: "delivered" }
-    assert_redirected_to tickets_production_path(productions(:main_production), tab: "delivered")
+    assert_redirected_to delivery_production_path(productions(:main_production), tab: "delivered")
+  end
+
+  test "update taken_up sets status to taken_up" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:completed_bike)), params: { status: "taken_up" }
+    assert bike_requests(:completed_bike).reload.taken_up?
+  end
+
+  test "update taken_up records the taker" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:completed_bike)), params: { status: "taken_up" }
+    assert_equal users(:prod_admin), bike_requests(:completed_bike).reload.taker
+  end
+
+  test "update taken_up redirects to delivery taken_up tab" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:completed_bike)), params: { status: "taken_up" }
+    assert_redirected_to delivery_production_path(productions(:main_production), tab: "taken_up")
+  end
+
+  test "update taken_up returns 403 for distribution user" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    patch bike_request_path(bike_requests(:completed_bike)), params: { status: "taken_up" }
+    assert_response :forbidden
+  end
+
+  test "update delivered from taken_up allows the taker" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    br = bike_requests(:taken_up_bike)
+    br.update_columns(taker_id: users(:prod_admin).id)
+    patch bike_request_path(br), params: { status: "delivered" }
+    assert br.reload.delivered?
+  end
+
+  test "update delivered from taken_up allows the master mechanic even if not the taker" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    br = bike_requests(:taken_up_bike)
+    br.update_columns(taker_id: users(:prod_admin).id)
+    patch bike_request_path(br), params: { status: "delivered" }
+    assert br.reload.delivered?
+  end
+
+  test "update delivered from taken_up returns 403 for a production user who is not the taker or master mechanic" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    br = bike_requests(:taken_up_bike)
+    br.update_columns(taker_id: users(:master_mechanic_user).id)
+    patch bike_request_path(br), params: { status: "delivered" }
+    assert_response :forbidden
+  end
+
+  test "update back to taken_up from delivered does not overwrite the taker" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    br = bike_requests(:completed_bike)
+    br.update_columns(status: BikeRequest.statuses[:delivered], taker_id: users(:master_mechanic_user).id)
+    patch bike_request_path(br), params: { status: "taken_up" }
+    br.reload
+    assert br.taken_up?
+    assert_equal users(:master_mechanic_user), br.taker
   end
 
   # --- archive / unarchive ---
@@ -366,10 +424,10 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert bike_requests(:pending_bike).reload.ready_for_delivery?
   end
 
-  test "complete_all redirects to production ready_for_delivery tab" do
+  test "complete_all redirects to delivery ready_for_delivery tab" do
     post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
     patch complete_all_bike_request_path(bike_requests(:pending_bike))
-    assert_redirected_to tickets_production_path(productions(:main_production), tab: "ready_for_delivery")
+    assert_redirected_to delivery_production_path(productions(:main_production), tab: "ready_for_delivery")
   end
 
   # --- update: distribution resubmit ---

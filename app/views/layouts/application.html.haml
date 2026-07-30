@@ -29,6 +29,9 @@
             - if @location_show_tickets
               = link_to "Bike Tickets", @location_path,
                   class: "ml-2 px-4 py-2 text-lg font-medium #{@location_active == :tickets ? 'bg-gray-900 text-white' : 'text-gray-900'}"
+            - if @location_show_delivery
+              = link_to "Delivery", @location_delivery_path,
+                  class: "px-4 py-2 text-lg font-medium #{@location_active == :delivery ? 'bg-gray-900 text-white' : 'text-gray-900'}"
             - if @location_inventory_path
               = link_to "Inventory", @location_inventory_path,
                   class: "px-4 py-2 text-lg font-medium #{@location_active == :inventory ? 'bg-gray-900 text-white' : 'text-gray-900'}"

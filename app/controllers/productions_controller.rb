@@ -9,10 +9,20 @@ class ProductionsController < ApplicationController
 
   def tickets
     @location_active = :tickets
-    @tab = params[:tab].presence_in(%w[requested pending ready_for_delivery delivered distributed archived]) || "requested"
-    @tab_counts = @production.bike_requests.group(:status).count
+    @tab = params[:tab].presence_in(%w[requested pending archived]) || "requested"
+    @tab_counts = @production.bike_requests.where(status: %w[requested pending archived]).group(:status).count
     scope = @production.bike_requests.where(status: @tab)
-                    .includes(:distribution, :user, :bikes, :owner)
+                    .includes(:distribution, :user, :bikes, :owner, :taker, :production)
+                    .order(due_date: :asc)
+    @pagy, @bike_requests = pagy(scope, limit: 20)
+  end
+
+  def delivery
+    @location_active = :delivery
+    @tab = params[:tab].presence_in(BikeRequest::DELIVERY_STATUSES) || "ready_for_delivery"
+    @tab_counts = @production.bike_requests.where(status: BikeRequest::DELIVERY_STATUSES).group(:status).count
+    scope = @production.bike_requests.where(status: @tab)
+                    .includes(:distribution, :user, :bikes, :owner, :taker, :production)
                     .order(due_date: :asc)
     @pagy, @bike_requests = pagy(scope, limit: 20)
   end
@@ -61,5 +71,7 @@ class ProductionsController < ApplicationController
     @location_inventory_path = inventory_production_path(@production)
     @location_donors_path    = production_donors_path(@production)
     @location_show_tickets   = true
+    @location_show_delivery  = true
+    @location_delivery_path  = delivery_production_path(@production)
   end
 end

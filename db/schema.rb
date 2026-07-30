@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_18_200630) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_30_174427) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -26,12 +26,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_200630) do
     t.string "requestor_name", null: false
     t.integer "status", default: 1, null: false
     t.integer "status_before_archival"
+    t.bigint "taker_id"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["distribution_id"], name: "index_bike_requests_on_distribution_id"
     t.index ["owner_id"], name: "index_bike_requests_on_owner_id"
     t.index ["production_id"], name: "index_bike_requests_on_production_id"
     t.index ["status"], name: "index_bike_requests_on_status"
+    t.index ["taker_id"], name: "index_bike_requests_on_taker_id"
     t.index ["user_id"], name: "index_bike_requests_on_user_id"
   end
 
@@ -121,6 +123,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_200630) do
   add_foreign_key "bike_requests", "productions"
   add_foreign_key "bike_requests", "users"
   add_foreign_key "bike_requests", "users", column: "owner_id"
+  add_foreign_key "bike_requests", "users", column: "taker_id"
   add_foreign_key "bikes", "bike_requests"
   add_foreign_key "donors", "productions"
   add_foreign_key "production_inventories", "productions"

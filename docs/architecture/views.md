@@ -17,7 +17,7 @@ Full design system: `DESIGN.md` at the project root. Summary:
 
 ## Shared partials
 
-- `app/views/bike_requests/_list.html.haml` — tab bar + request cards + pagination, used by both Production and Distribution dashboards. Accepts: `active_tab`, `bike_requests`, `pagy`, `production_view` (bool — shows action buttons and hides DC name when true)
+- `app/views/bike_requests/_list.html.haml` — tab bar + request cards + pagination, used by Production's Bike Tickets and Delivery dashboards and Distribution's Bike Tickets dashboard. Accepts: `active_tab`, `bike_requests`, `pagy`, `tab_counts`, `tabs` (array of status names shown as tabs — each caller passes its own subset), `production_view` (bool — shows action buttons and hides DC name when true)
 
 ## Pagination
 

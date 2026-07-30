@@ -61,6 +61,54 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_not assigns(:bike_requests).include?(other_request)
   end
 
+  test "show ignores ready_for_delivery/delivered/distributed tabs and defaults to requested" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    %w[ready_for_delivery delivered distributed].each do |tab|
+      get tickets_production_path(productions(:main_production)), params: { tab: tab }
+      assert_response :success
+      assert_equal "requested", assigns(:tab)
+    end
+  end
+
+  # --- delivery action ---
+
+  test "delivery requires authentication" do
+    get delivery_production_path(productions(:main_production))
+    assert_redirected_to login_path
+  end
+
+  test "delivery returns 403 for user without production access" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    get delivery_production_path(productions(:main_production))
+    assert_response :forbidden
+  end
+
+  test "delivery renders for authorized production user" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get delivery_production_path(productions(:main_production))
+    assert_response :success
+  end
+
+  test "delivery defaults to ready_for_delivery tab" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get delivery_production_path(productions(:main_production))
+    assert_equal "ready_for_delivery", assigns(:tab)
+  end
+
+  test "delivery ignores invalid tab parameter and defaults to ready_for_delivery" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get delivery_production_path(productions(:main_production)), params: { tab: "badtab" }
+    assert_response :success
+    assert_equal "ready_for_delivery", assigns(:tab)
+  end
+
+  test "delivery accepts taken_up tab" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get delivery_production_path(productions(:main_production)), params: { tab: "taken_up" }
+    assert_response :success
+    assert_equal "taken_up", assigns(:tab)
+  end
+
   # --- inventory action ---
 
   test "inventory requires authentication" do

@@ -1,4 +1,3 @@
-- tabs = %w[requested pending ready_for_delivery delivered distributed archived]
 .flex.border-b-2.border-gray-900.mb-8
   - tabs.each do |tab|
     = link_to url_for(tab: tab), class: "px-6 py-3 text-lg font-medium #{active_tab == tab ? 'font-bold border-b-4 border-gray-900 -mb-0.5' : 'text-gray-500'}" do
@@ -22,6 +21,10 @@
               %p.text-lg.text-gray-500
                 Owned by
                 = req.owner.name
+            - if req.taker.present?
+              %p.text-lg.text-gray-500
+                Picked up by
+                = req.taker.name
             %p.text-lg.text-gray-500= req.requestor_name
             %p.text-lg.text-gray-600= req.phone
           .flex.flex-col.items-end.gap-1
@@ -91,13 +94,13 @@
               = button_to "Ready for Delivery", complete_all_bike_request_path(req), method: :patch,
                   class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
             - elsif req.ready_for_delivery?
-              = button_to "Mark Delivered", bike_request_path(req), method: :patch, params: { status: "delivered" },
+              = button_to "I've got this", bike_request_path(req), method: :patch, params: { status: "taken_up" },
+                  class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
+            - elsif req.taken_up?
+              = button_to "I'm done!", bike_request_path(req), method: :patch, params: { status: "delivered" },
                   class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
             - elsif req.delivered?
-              = button_to "Back to Ready for Delivery", bike_request_path(req), method: :patch, params: { status: "ready_for_delivery" },
-                  class: "px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
-            - elsif req.distributed?
-              = button_to "Back to Delivered", bike_request_path(req), method: :patch, params: { status: "delivered" },
+              = button_to "Back to Taken Up", bike_request_path(req), method: :patch, params: { status: "taken_up" },
                   class: "px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
             - elsif req.archived?
               = button_to "Unarchive", bike_request_path(req), method: :patch, params: { status: "unarchive" },

@@ -8,10 +8,11 @@ Each type has its own dashboard controller, join table, and join model. Adding a
 
 - Model: `Production` — `app/models/production.rb`
 - Join: `UserProduction` (`user_id`, `production_id`, `role`) — roles defined in `UserProduction::ROLES`
-- Controller: `ProductionsController` — actions: `show` (redirects to tickets), `tickets`, `users`
+- Controller: `ProductionsController` — actions: `show` (redirects to tickets), `tickets`, `delivery`, `users`
 - Routes:
   - `GET /productions/:id` — redirects to tickets
-  - `GET /productions/:id/tickets` — bike ticket dashboard
+  - `GET /productions/:id/tickets` — bike ticket dashboard (requested/pending/archived only — see Bike Requests below)
+  - `GET /productions/:id/delivery` — delivery dashboard (ready_for_delivery/taken_up/delivered)
   - `GET /productions/:id/users` — member management (admin only)
 - Currently one record (`Main Production`)
 
@@ -39,19 +40,23 @@ Nested routes:
 
 Distributions submit bike requests to a production. One request = one person with one or more bikes. Productions can also submit internal requests directly (no distribution).
 
-Model: `BikeRequest` — fields: `phone` (10 digits exactly, no formatting), `requestor_name`, `due_date`, `status` (enum), `denial_reason`, `status_before_archival`, `owner_id` (FK to users — the production member assigned at approval)
+Model: `BikeRequest` — fields: `phone` (10 digits exactly, no formatting), `requestor_name`, `due_date`, `status` (enum), `denial_reason`, `status_before_archival`, `owner_id` (FK to users — the production member assigned at approval), `taker_id` (FK to users — the production member who claimed the delivery via "I've got this")
 
 Each request `has_many :bikes`. `Bike` fields: `name` (optional), `bike_type` (enum: male/female/kid, default male), `age` (required when type is kid), `height`, `notes` (all optional).
 
-Status flow: `requested (1)` → production approves → `pending (0)` → master mechanic marks ready → `ready_for_delivery (2)` → production marks delivered → `delivered (3)` → requestor marks distributed → `distributed (4)`. Production can also deny: `requested` → `denied (5)` → distribution edits and resubmits → `requested`.
+Status flow: `requested (1)` → production approves → `pending (0)` → master mechanic marks ready → `ready_for_delivery (2)` → delivery volunteer takes it up → `taken_up (7)` → delivery volunteer marks done → `delivered (3)` → requestor marks distributed → `distributed (4)`. Production can also deny: `requested` → `denied (5)` → distribution edits and resubmits → `requested`.
 
 - Distribution-submitted requests start as `requested` (awaiting approval); production-submitted requests start as `pending` (skip approval)
 - Approving a request requires selecting a production member as the owner via a live-search dropdown; Approve is disabled until one is chosen. The owner is stored on the record.
 - Only a `master_mechanic` (or superadmin) can advance `pending` → `ready_for_delivery` via the "Ready for Delivery" button
+- `ready_for_delivery` → `taken_up` ("I've got this") is only available on the production's Delivery dashboard and is open to any production member (admin, volunteer, or master_mechanic). It records the acting user as `taker_id`, shown on the card as "Picked up by".
+- `taken_up` → `delivered` ("I'm done!") is restricted to the recorded `taker` or a `master_mechanic` (or superadmin) — not open to any production member. A `delivered` → `taken_up` back-transition ("Back to Taken Up") does not change `taker_id`.
 - "Mark Distributed" is restricted to the entity that submitted the request: distribution users for distribution-submitted requests, production users for production-submitted requests
 - Denied cards show a red outline in the distribution's requested tab
 - Cards can be archived from any non-requested, non-archived status; unarchiving restores the previous status
-- Back-transitions allowed at each step (ready_for_delivery ↔ delivered ↔ distributed)
+- Back-transitions allowed at each step (taken_up ↔ delivered ↔ distributed); `delivered` cards can go back to `taken_up`
+
+Production's Bike Tickets dashboard only shows `requested`/`pending`/`archived` — once a request reaches `ready_for_delivery`, it moves to the production's Delivery dashboard instead, covering `ready_for_delivery`/`taken_up`/`delivered`. Distribution's Bike Tickets dashboard is unaffected and still shows the full flow end to end (`requested`/`pending`/`ready_for_delivery`/`delivered`/`distributed`/`archived` — `taken_up` is Delivery-exclusive and never shown there).
 
 Production roles in `UserProduction::ROLES`: `admin`, `volunteer`, `master_mechanic`
 

@@ -81,6 +81,8 @@ class BikeRequestTest < ActiveSupport::TestCase
     br = bike_requests(:requested_bike)
     br.update!(status: :ready_for_delivery)
     assert br.ready_for_delivery?
+    br.update!(status: :taken_up)
+    assert br.taken_up?
     br.update!(status: :delivered)
     assert br.delivered?
     br.update!(status: :distributed)
@@ -152,6 +154,17 @@ class BikeRequestTest < ActiveSupport::TestCase
   test "pending request due today is not overdue" do
     br = bike_requests(:pending_bike)
     br.update_column(:due_date, Date.today)
+    assert_not br.overdue?
+  end
+
+  test "taken_up request with past due_date is overdue" do
+    br = bike_requests(:taken_up_bike)
+    br.update_column(:due_date, Date.today - 1)
+    assert br.overdue?
+  end
+
+  test "taken_up request with future due_date is not overdue" do
+    br = bike_requests(:taken_up_bike)
     assert_not br.overdue?
   end
 end
