@@ -43,3 +43,7 @@ After cloning, run:
 ```
 
 This initialises PostgreSQL, installs gems, configures git hooks, runs migrations, and seeds the database.
+
+## CI
+
+`.github/workflows/docker.yml` builds the production `Dockerfile` and pushes it to GHCR (`ghcr.io/ub-humane/wheels`) on every push to `main` and on `v*.*.*` tags, tagging `latest` on `main`. Pull requests only build the image (Dockerfile validation) — nothing is pushed. The image name is lowercased at runtime since GHCR requires lowercase repository paths.
