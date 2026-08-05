@@ -8,6 +8,9 @@ Rails.application.routes.draw do
   get    "/signup",   to: "registrations#new",      as: :signup
   post   "/signup",   to: "registrations#create"
 
+  get    "/auth/:provider/callback", to: "sessions#omniauth"
+  get    "/auth/failure",            to: "sessions#omniauth_failure"
+
   root to: "home#index"
 
   resource :profile, only: [ :edit, :update ]

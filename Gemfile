@@ -68,3 +68,9 @@ gem "pagy", "~> 9.0"
 gem "haml-rails", "~> 3.0"
 
 gem "html2haml", "~> 2.3"
+
+gem "dotenv", "~> 3.2"
+
+gem "omniauth", "~> 2.1"
+gem "omniauth-google-oauth2", "~> 1.1"
+gem "omniauth-rails_csrf_protection", "~> 1.0"

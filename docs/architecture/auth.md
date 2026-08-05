@@ -7,6 +7,14 @@ Custom session-based auth using `has_secure_password` (bcrypt). No Devise.
 - `SessionsController` — login/logout at `/login` and `/logout`; skips `require_authentication`
 - `ApplicationController` — memoizes `current_user` from `session[:user_id]`; `require_authentication` is a default `before_action` on all controllers
 
+## Sign in with Google
+
+`omniauth` + `omniauth-google-oauth2`, configured in `config/initializers/omniauth.rb` from `ENV["GOOGLE_OAUTH_CLIENT_ID"]` / `ENV["GOOGLE_OAUTH_CLIENT_SECRET"]` (loaded from `.env` via the `dotenv` gem — see `docs/dev-environment.md`). `omniauth-rails_csrf_protection` restricts the request phase to `POST` with a valid Rails CSRF token, so the "Sign in with Google" button on `/login` is a `button_to`, not a plain link.
+
+- `POST /auth/google_oauth2` — request phase, handled entirely by the OmniAuth Rack middleware (no Rails route)
+- `GET /auth/google_oauth2/callback` → `SessionsController#omniauth` — matches a `User` by the email Google verifies (`auth.info.email`); if none exists, auto-creates one (`name` from Google, falling back to the email if Google gives no name; a random unusable password to satisfy `has_secure_password`/`password_digest NOT NULL`). New accounts have no location assignments until a superadmin assigns them.
+- `GET /auth/failure` → `SessionsController#omniauth_failure` — redirects to `/login` with an alert on any OmniAuth failure (denied consent, etc.)
+
 ## Authorization
 
 Access is determined entirely by location assignments, not a global role.
