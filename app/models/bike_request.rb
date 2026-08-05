@@ -1,7 +1,7 @@
 class BikeRequest < ApplicationRecord
   MAX_BIKES = 15
   DELIVERY_STATUSES = %w[ready_for_delivery taken_up delivered]
-  MECHANIC_STATUSES = %w[pending ready_for_delivery taken_up delivered distributed archived]
+  MECHANIC_STATUSES = %w[pending ready_for_delivery taken_up]
 
   belongs_to :distribution, optional: true
   belongs_to :production

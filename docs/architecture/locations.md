@@ -13,7 +13,7 @@ Each type has its own dashboard controller, join table, and join model. Adding a
   - `GET /productions/:id` — redirects to tickets
   - `GET /productions/:id/tickets` — bike ticket dashboard (requested/pending/archived only — see Bike Requests below)
   - `GET /productions/:id/delivery` — delivery dashboard (ready_for_delivery/taken_up/delivered)
-  - `GET /productions/:id/your_tickets` — master-mechanic-only dashboard covering every status except `requested` (`BikeRequest::MECHANIC_STATUSES`); unfiltered by ownership — shows every matching request at the production, not just ones the viewing mechanic claimed. 403s for anyone who isn't a `master_mechanic` (or superadmin) at that production
+  - `GET /productions/:id/your_tickets` — master-mechanic-only dashboard covering `pending`/`ready_for_delivery`/`taken_up` (`BikeRequest::MECHANIC_STATUSES`); unfiltered by ownership — shows every matching request at the production, not just ones the viewing mechanic claimed. 403s for anyone who isn't a `master_mechanic` (or superadmin) at that production
   - `GET /productions/:id/users` — member management (admin only)
 - Currently one record (`Main Production`)
 
