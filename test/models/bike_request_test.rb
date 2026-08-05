@@ -89,6 +89,32 @@ class BikeRequestTest < ActiveSupport::TestCase
     assert br.distributed?
   end
 
+  test "owner can be a master mechanic" do
+    br = valid_bike_request
+    br.owner = users(:master_mechanic_user)
+    assert br.valid?
+  end
+
+  test "owner cannot be a non-master-mechanic production member" do
+    br = valid_bike_request
+    br.owner = users(:prod_admin)
+    assert_not br.valid?
+    assert_includes br.errors[:owner], "must be a master mechanic"
+  end
+
+  test "owner cannot be a user with no production role at all" do
+    br = valid_bike_request
+    br.owner = users(:no_location_user)
+    assert_not br.valid?
+    assert_includes br.errors[:owner], "must be a master mechanic"
+  end
+
+  test "owner is optional" do
+    br = valid_bike_request
+    br.owner = nil
+    assert br.valid?
+  end
+
   test "belongs_to distribution" do
     br = bike_requests(:requested_bike)
     assert_equal distributions(:downtown_dist), br.distribution

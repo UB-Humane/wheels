@@ -143,11 +143,20 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to tickets_production_path(productions(:main_production))
   end
 
-  test "create production request saves owner" do
+  test "create production request saves owner when owner is a master mechanic" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     post production_bike_requests_path(productions(:main_production)),
-         params: { bike_request: valid_bike_request_params.merge(owner_id: users(:prod_admin).id) }
-    assert_equal users(:prod_admin), BikeRequest.last.owner
+         params: { bike_request: valid_bike_request_params.merge(owner_id: users(:master_mechanic_user).id) }
+    assert_equal users(:master_mechanic_user), BikeRequest.last.owner
+  end
+
+  test "create production request rejects an owner who is not a master mechanic" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    assert_no_difference "BikeRequest.count" do
+      post production_bike_requests_path(productions(:main_production)),
+           params: { bike_request: valid_bike_request_params.merge(owner_id: users(:prod_admin).id) }
+    end
+    assert_response :unprocessable_entity
   end
 
   test "create distribution request ignores owner_id param" do
@@ -201,11 +210,21 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert bike_requests(:requested_bike).reload.pending?
   end
 
-  test "update approve saves owner" do
+  test "update approve saves owner when owner is a master mechanic" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:requested_bike)),
+          params: { status: "approve", owner_id: users(:master_mechanic_user).id }
+    assert_equal users(:master_mechanic_user), bike_requests(:requested_bike).reload.owner
+  end
+
+  test "update approve rejects an owner who is not a master mechanic" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch bike_request_path(bike_requests(:requested_bike)),
           params: { status: "approve", owner_id: users(:prod_admin).id }
-    assert_equal users(:prod_admin), bike_requests(:requested_bike).reload.owner
+    br = bike_requests(:requested_bike).reload
+    assert br.requested?
+    assert_nil br.owner
+    assert_redirected_to tickets_production_path(productions(:main_production), tab: "requested")
   end
 
   test "update approve redirects to production pending tab" do

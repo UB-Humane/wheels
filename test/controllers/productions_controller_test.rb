@@ -232,14 +232,22 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
-  test "members returns matching production members as JSON" do
+  test "members returns matching master mechanics as JSON" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get members_production_path(productions(:main_production)), params: { q: "Master Mechanic" }
+    assert_response :success
+    result = JSON.parse(response.body)
+    assert_equal 1, result.length
+    assert_equal users(:master_mechanic_user).id, result.first["id"]
+    assert_equal users(:master_mechanic_user).name, result.first["name"]
+  end
+
+  test "members does not return production members who are not master mechanics" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     get members_production_path(productions(:main_production)), params: { q: "Production Admin" }
     assert_response :success
     result = JSON.parse(response.body)
-    assert_equal 1, result.length
-    assert_equal users(:prod_admin).id, result.first["id"]
-    assert_equal users(:prod_admin).name, result.first["name"]
+    assert_empty result
   end
 
   test "members does not return users outside the production" do
@@ -248,5 +256,74 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     result = JSON.parse(response.body)
     assert_empty result
+  end
+
+  # --- your_tickets action ---
+
+  test "your_tickets requires authentication" do
+    get your_tickets_production_path(productions(:main_production))
+    assert_redirected_to login_path
+  end
+
+  test "your_tickets returns 403 for production admin who is not a master mechanic" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production))
+    assert_response :forbidden
+  end
+
+  test "your_tickets returns 403 for production volunteer" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production))
+    assert_response :forbidden
+  end
+
+  test "your_tickets returns 403 for distribution user" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production))
+    assert_response :forbidden
+  end
+
+  test "your_tickets renders for master mechanic" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production))
+    assert_response :success
+  end
+
+  test "your_tickets renders for superadmin without explicit master mechanic role" do
+    post login_path, params: { email: users(:superadmin).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production))
+    assert_response :success
+  end
+
+  test "your_tickets defaults to pending tab" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production))
+    assert_equal "pending", assigns(:tab)
+  end
+
+  test "your_tickets ignores requested tab and defaults to pending" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production)), params: { tab: "requested" }
+    assert_equal "pending", assigns(:tab)
+  end
+
+  test "your_tickets ignores invalid tab and defaults to pending" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production)), params: { tab: "badtab" }
+    assert_equal "pending", assigns(:tab)
+  end
+
+  test "your_tickets accepts delivery statuses as tabs" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production)), params: { tab: "taken_up" }
+    assert_response :success
+    assert_equal "taken_up", assigns(:tab)
+    assert_includes assigns(:bike_requests), bike_requests(:taken_up_bike)
+  end
+
+  test "your_tickets tab_counts excludes requested" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production))
+    assert_not_includes assigns(:tab_counts).keys, "requested"
   end
 end

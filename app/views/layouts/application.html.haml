@@ -32,6 +32,9 @@
             - if @location_show_delivery
               = link_to "Delivery", @location_delivery_path,
                   class: "px-4 py-2 text-lg font-medium #{@location_active == :delivery ? 'bg-gray-900 text-white' : 'text-gray-900'}"
+            - if @location_master_mechanic
+              = link_to "Your Tickets", @location_your_tickets_path,
+                  class: "px-4 py-2 text-lg font-medium #{@location_active == :your_tickets ? 'bg-gray-900 text-white' : 'text-gray-900'}"
             - if @location_inventory_path
               = link_to "Inventory", @location_inventory_path,
                   class: "px-4 py-2 text-lg font-medium #{@location_active == :inventory ? 'bg-gray-900 text-white' : 'text-gray-900'}"

@@ -8,11 +8,12 @@ Each type has its own dashboard controller, join table, and join model. Adding a
 
 - Model: `Production` — `app/models/production.rb`
 - Join: `UserProduction` (`user_id`, `production_id`, `role`) — roles defined in `UserProduction::ROLES`
-- Controller: `ProductionsController` — actions: `show` (redirects to tickets), `tickets`, `delivery`, `users`
+- Controller: `ProductionsController` — actions: `show` (redirects to tickets), `tickets`, `delivery`, `your_tickets`, `users`
 - Routes:
   - `GET /productions/:id` — redirects to tickets
   - `GET /productions/:id/tickets` — bike ticket dashboard (requested/pending/archived only — see Bike Requests below)
   - `GET /productions/:id/delivery` — delivery dashboard (ready_for_delivery/taken_up/delivered)
+  - `GET /productions/:id/your_tickets` — master-mechanic-only dashboard covering every status except `requested` (`BikeRequest::MECHANIC_STATUSES`); unfiltered by ownership — shows every matching request at the production, not just ones the viewing mechanic claimed. 403s for anyone who isn't a `master_mechanic` (or superadmin) at that production
   - `GET /productions/:id/users` — member management (admin only)
 - Currently one record (`Main Production`)
 
@@ -47,7 +48,7 @@ Each request `has_many :bikes`. `Bike` fields: `name` (optional), `bike_type` (e
 Status flow: `requested (1)` → production approves → `pending (0)` → master mechanic marks ready → `ready_for_delivery (2)` → delivery volunteer takes it up → `taken_up (7)` → delivery volunteer marks done → `delivered (3)` → requestor marks distributed → `distributed (4)`. Production can also deny: `requested` → `denied (5)` → distribution edits and resubmits → `requested`.
 
 - Distribution-submitted requests start as `requested` (awaiting approval); production-submitted requests start as `pending` (skip approval)
-- Approving a request requires selecting a production member as the owner via a live-search dropdown; Approve is disabled until one is chosen. The owner is stored on the record.
+- Approving a request requires selecting a production member as the owner via a live-search dropdown; Approve is disabled until one is chosen. The owner is stored on the record. The live-search endpoint (`GET /productions/:id/members`) and a `BikeRequest` model validation both restrict the owner to a `master_mechanic` at that production — a request with a non-master-mechanic `owner_id` fails validation (`errors[:owner]`, "must be a master mechanic"), on both `create` (production-submitted requests) and `approve` (distribution-submitted requests).
 - Only a `master_mechanic` (or superadmin) can advance `pending` → `ready_for_delivery` via the "Ready for Delivery" button
 - `ready_for_delivery` → `taken_up` ("I've got this") is only available on the production's Delivery dashboard and is open to any production member (admin, volunteer, or master_mechanic). It records the acting user as `taker_id`, shown on the card as "Picked up by".
 - `taken_up` → `delivered` ("I'm done!") is restricted to the recorded `taker` or a `master_mechanic` (or superadmin) — not open to any production member. Setting `delivered` from any *other* status (a skip-ahead from `ready_for_delivery`, or the `distributed` → `delivered` correction below) requires `admin` or `master_mechanic` instead — there is no way for a plain volunteer to set `delivered` directly.

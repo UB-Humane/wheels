@@ -1,6 +1,7 @@
 class BikeRequest < ApplicationRecord
   MAX_BIKES = 15
   DELIVERY_STATUSES = %w[ready_for_delivery taken_up delivered]
+  MECHANIC_STATUSES = %w[pending ready_for_delivery taken_up delivered distributed archived]
 
   belongs_to :distribution, optional: true
   belongs_to :production
@@ -17,6 +18,7 @@ class BikeRequest < ApplicationRecord
   validates :requestor_name, presence: true
   validates :due_date, presence: true
   validate :due_date_in_future, on: :create
+  validate :owner_must_be_master_mechanic
 
   def bikes_label_data
     bikes.map(&:label_data)
@@ -31,5 +33,12 @@ class BikeRequest < ApplicationRecord
   def due_date_in_future
     return unless due_date
     errors.add(:due_date, "must be in the future") if due_date <= Date.today
+  end
+
+  def owner_must_be_master_mechanic
+    return unless owner_id.present? && production.present?
+    unless UserProduction.exists?(user_id: owner_id, production: production, role: "master_mechanic")
+      errors.add(:owner, "must be a master mechanic")
+    end
   end
 end

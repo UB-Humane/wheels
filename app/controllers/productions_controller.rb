@@ -35,10 +35,21 @@ class ProductionsController < ApplicationController
   def members
     q = "%#{params[:q]}%"
     users = User.joins(:user_productions)
-                .where(user_productions: { production: @production })
+                .where(user_productions: { production: @production, role: "master_mechanic" })
                 .where("users.name ILIKE ? OR users.email ILIKE ?", q, q)
                 .order(:name).limit(10)
     render json: users.map { |u| { id: u.id, name: u.name, email: u.email } }
+  end
+
+  def your_tickets
+    return render plain: "Access denied", status: :forbidden unless production_master_mechanic?(@production)
+    @location_active = :your_tickets
+    @tab = params[:tab].presence_in(BikeRequest::MECHANIC_STATUSES) || "pending"
+    @tab_counts = @production.bike_requests.where(status: BikeRequest::MECHANIC_STATUSES).group(:status).count
+    scope = @production.bike_requests.where(status: @tab)
+                    .includes(:distribution, :user, :bikes, :owner, :taker, :production)
+                    .order(due_date: :asc)
+    @pagy, @bike_requests = pagy(scope, limit: 20)
   end
 
   def users
@@ -73,5 +84,7 @@ class ProductionsController < ApplicationController
     @location_show_tickets   = true
     @location_show_delivery  = true
     @location_delivery_path  = delivery_production_path(@production)
+    @location_master_mechanic  = production_master_mechanic?(@production)
+    @location_your_tickets_path = your_tickets_production_path(@production)
   end
 end
