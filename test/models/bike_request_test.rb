@@ -95,18 +95,24 @@ class BikeRequestTest < ActiveSupport::TestCase
     assert br.valid?
   end
 
-  test "owner cannot be a non-master-mechanic production member" do
+  test "owner can be an admin" do
     br = valid_bike_request
     br.owner = users(:prod_admin)
+    assert br.valid?
+  end
+
+  test "owner cannot be a volunteer" do
+    br = valid_bike_request
+    br.owner = users(:prod_volunteer)
     assert_not br.valid?
-    assert_includes br.errors[:owner], "must be a master mechanic"
+    assert_includes br.errors[:owner], "must be a master mechanic or admin"
   end
 
   test "owner cannot be a user with no production role at all" do
     br = valid_bike_request
     br.owner = users(:no_location_user)
     assert_not br.valid?
-    assert_includes br.errors[:owner], "must be a master mechanic"
+    assert_includes br.errors[:owner], "must be a master mechanic or admin"
   end
 
   test "owner is optional" do

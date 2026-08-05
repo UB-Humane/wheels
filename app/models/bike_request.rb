@@ -18,7 +18,7 @@ class BikeRequest < ApplicationRecord
   validates :requestor_name, presence: true
   validates :due_date, presence: true
   validate :due_date_in_future, on: :create
-  validate :owner_must_be_master_mechanic
+  validate :owner_must_be_eligible
 
   def bikes_label_data
     bikes.map(&:label_data)
@@ -35,10 +35,10 @@ class BikeRequest < ApplicationRecord
     errors.add(:due_date, "must be in the future") if due_date <= Date.today
   end
 
-  def owner_must_be_master_mechanic
+  def owner_must_be_eligible
     return unless owner_id.present? && production.present?
-    unless UserProduction.exists?(user_id: owner_id, production: production, role: "master_mechanic")
-      errors.add(:owner, "must be a master mechanic")
+    unless UserProduction.exists?(user_id: owner_id, production: production, role: UserProduction::OWNER_ROLES)
+      errors.add(:owner, "must be a master mechanic or admin")
     end
   end
 end

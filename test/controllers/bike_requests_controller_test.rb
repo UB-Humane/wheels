@@ -150,11 +150,18 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_equal users(:master_mechanic_user), BikeRequest.last.owner
   end
 
-  test "create production request rejects an owner who is not a master mechanic" do
+  test "create production request saves owner when owner is an admin" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    post production_bike_requests_path(productions(:main_production)),
+         params: { bike_request: valid_bike_request_params.merge(owner_id: users(:prod_admin).id) }
+    assert_equal users(:prod_admin), BikeRequest.last.owner
+  end
+
+  test "create production request rejects an owner who is a volunteer" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     assert_no_difference "BikeRequest.count" do
       post production_bike_requests_path(productions(:main_production)),
-           params: { bike_request: valid_bike_request_params.merge(owner_id: users(:prod_admin).id) }
+           params: { bike_request: valid_bike_request_params.merge(owner_id: users(:prod_volunteer).id) }
     end
     assert_response :unprocessable_entity
   end
@@ -217,10 +224,17 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_equal users(:master_mechanic_user), bike_requests(:requested_bike).reload.owner
   end
 
-  test "update approve rejects an owner who is not a master mechanic" do
+  test "update approve saves owner when owner is an admin" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch bike_request_path(bike_requests(:requested_bike)),
           params: { status: "approve", owner_id: users(:prod_admin).id }
+    assert_equal users(:prod_admin), bike_requests(:requested_bike).reload.owner
+  end
+
+  test "update approve rejects an owner who is a volunteer" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:requested_bike)),
+          params: { status: "approve", owner_id: users(:prod_volunteer).id }
     br = bike_requests(:requested_bike).reload
     assert br.requested?
     assert_nil br.owner
@@ -396,6 +410,16 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to tickets_production_path(productions(:main_production), tab: "requested")
   end
 
+  test "update back_to_requested clears owner and taker" do
+    br = bike_requests(:pending_bike)
+    br.update_columns(owner_id: users(:master_mechanic_user).id, taker_id: users(:prod_volunteer).id)
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(br), params: { status: "back_to_requested" }
+    br.reload
+    assert_nil br.owner
+    assert_nil br.taker
+  end
+
   test "update back_to_pending moves ready_for_delivery back to pending and is admin/master-mechanic only" do
     post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
     patch bike_request_path(bike_requests(:completed_bike)), params: { status: "back_to_pending" }
@@ -539,6 +563,16 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     patch bike_request_path(bike_requests(:requested_bike)),
           params: { bike_request: resubmit_params }
     assert bike_requests(:requested_bike).reload.requested?
+  end
+
+  test "resubmit clears owner and taker" do
+    br = bike_requests(:denied_bike)
+    br.update_columns(owner_id: users(:master_mechanic_user).id, taker_id: users(:prod_volunteer).id)
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    patch bike_request_path(br), params: { bike_request: resubmit_params }
+    br.reload
+    assert_nil br.owner
+    assert_nil br.taker
   end
 
   private

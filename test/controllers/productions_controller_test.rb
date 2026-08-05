@@ -242,9 +242,18 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal users(:master_mechanic_user).name, result.first["name"]
   end
 
-  test "members does not return production members who are not master mechanics" do
+  test "members returns matching admins as JSON" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     get members_production_path(productions(:main_production)), params: { q: "Production Admin" }
+    assert_response :success
+    result = JSON.parse(response.body)
+    assert_equal 1, result.length
+    assert_equal users(:prod_admin).id, result.first["id"]
+  end
+
+  test "members does not return volunteers" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get members_production_path(productions(:main_production)), params: { q: "Production Volunteer" }
     assert_response :success
     result = JSON.parse(response.body)
     assert_empty result
@@ -265,10 +274,10 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
   end
 
-  test "your_tickets returns 403 for production admin who is not a master mechanic" do
+  test "your_tickets renders for production admin who is not a master mechanic" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     get your_tickets_production_path(productions(:main_production))
-    assert_response :forbidden
+    assert_response :success
   end
 
   test "your_tickets returns 403 for production volunteer" do
@@ -314,11 +323,26 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "your_tickets accepts delivery statuses as tabs" do
+    bike_requests(:taken_up_bike).update_columns(owner_id: users(:master_mechanic_user).id)
     post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
     get your_tickets_production_path(productions(:main_production)), params: { tab: "taken_up" }
     assert_response :success
     assert_equal "taken_up", assigns(:tab)
     assert_includes assigns(:bike_requests), bike_requests(:taken_up_bike)
+  end
+
+  test "your_tickets only shows requests owned by the current user" do
+    bike_requests(:taken_up_bike).update_columns(owner_id: users(:prod_admin).id)
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production)), params: { tab: "taken_up" }
+    assert_not_includes assigns(:bike_requests), bike_requests(:taken_up_bike)
+  end
+
+  test "your_tickets tab_counts only reflect the current user's owned requests" do
+    bike_requests(:taken_up_bike).update_columns(owner_id: users(:prod_admin).id)
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    get your_tickets_production_path(productions(:main_production))
+    assert_equal 0, assigns(:tab_counts)["taken_up"].to_i
   end
 
   test "your_tickets tab_counts excludes requested" do

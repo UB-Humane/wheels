@@ -3,6 +3,7 @@ class UserProduction < ApplicationRecord
   belongs_to :production
 
   ROLES = %w[admin volunteer master_mechanic].freeze
+  OWNER_ROLES = %w[admin master_mechanic].freeze
 
   validates :role, inclusion: { in: ROLES }
   validates :user_id, uniqueness: { scope: :production_id }

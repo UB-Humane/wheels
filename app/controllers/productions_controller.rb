@@ -35,18 +35,19 @@ class ProductionsController < ApplicationController
   def members
     q = "%#{params[:q]}%"
     users = User.joins(:user_productions)
-                .where(user_productions: { production: @production, role: "master_mechanic" })
+                .where(user_productions: { production: @production, role: UserProduction::OWNER_ROLES })
                 .where("users.name ILIKE ? OR users.email ILIKE ?", q, q)
                 .order(:name).limit(10)
     render json: users.map { |u| { id: u.id, name: u.name, email: u.email } }
   end
 
   def your_tickets
-    return render plain: "Access denied", status: :forbidden unless production_master_mechanic?(@production)
+    return render plain: "Access denied", status: :forbidden unless production_ticket_owner_eligible?
     @location_active = :your_tickets
     @tab = params[:tab].presence_in(BikeRequest::MECHANIC_STATUSES) || "pending"
-    @tab_counts = @production.bike_requests.where(status: BikeRequest::MECHANIC_STATUSES).group(:status).count
-    scope = @production.bike_requests.where(status: @tab)
+    owned = @production.bike_requests.where(owner: current_user)
+    @tab_counts = owned.where(status: BikeRequest::MECHANIC_STATUSES).group(:status).count
+    scope = owned.where(status: @tab)
                     .includes(:distribution, :user, :bikes, :owner, :taker, :production)
                     .order(due_date: :asc)
     @pagy, @bike_requests = pagy(scope, limit: 20)
@@ -74,6 +75,10 @@ class ProductionsController < ApplicationController
     require_production_access(@production)
   end
 
+  def production_ticket_owner_eligible?
+    production_admin?(@production) || production_master_mechanic?(@production)
+  end
+
   def set_location_nav
     @location_name         = @production.name
     @location_path         = tickets_production_path(@production)
@@ -84,7 +89,7 @@ class ProductionsController < ApplicationController
     @location_show_tickets   = true
     @location_show_delivery  = true
     @location_delivery_path  = delivery_production_path(@production)
-    @location_master_mechanic  = production_master_mechanic?(@production)
+    @location_show_your_tickets = production_ticket_owner_eligible?
     @location_your_tickets_path = your_tickets_production_path(@production)
   end
 end

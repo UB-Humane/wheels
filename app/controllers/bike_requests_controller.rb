@@ -83,7 +83,7 @@ class BikeRequestsController < ApplicationController
     when "delivered"    then { status: :delivered }
     when "archive"      then { status: :archived, status_before_archival: @bike_request.read_attribute(:status) }
     when "unarchive"    then { status: restored, status_before_archival: nil }
-    when "back_to_requested"         then { status: :requested }
+    when "back_to_requested"         then { status: :requested, owner_id: nil, taker_id: nil }
     when "back_to_pending"            then { status: :pending }
     when "back_to_ready_for_delivery" then { status: :ready_for_delivery }
     when "back_to_taken_up"           then { status: :taken_up }
@@ -113,7 +113,7 @@ class BikeRequestsController < ApplicationController
   end
 
   def handle_distribution_resubmit
-    if @bike_request.update(resubmit_params.merge(status: :requested, denial_reason: nil))
+    if @bike_request.update(resubmit_params.merge(status: :requested, denial_reason: nil, owner_id: nil, taker_id: nil))
       redirect_to tickets_distribution_path(@bike_request.distribution, tab: "requested")
     else
       render :edit, status: :unprocessable_entity
