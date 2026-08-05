@@ -42,7 +42,10 @@
               = link_to "Manage Users", @location_users_path,
                   class: "px-4 py-2 text-lg font-medium #{@location_active == :users ? 'bg-gray-900 text-white' : 'text-gray-900'}"
         .flex.items-center.gap-8
-          %span.text-lg.text-gray-700= current_user.name
+          = link_to edit_profile_path, class: "flex items-center gap-2 text-lg text-gray-700 hover:text-gray-900 transition-colors" do
+            %span= current_user.name
+            %svg{xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", fill: "currentColor", width: "16", height: "16", aria: { hidden: "true" }}
+              %path{d: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"}
           = button_to "Log out", logout_path, method: :delete, class: "text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
     - if flash[:notice]
       .px-6.py-3.bg-green-100.border-b.border-green-300.text-green-900.text-lg= flash[:notice]

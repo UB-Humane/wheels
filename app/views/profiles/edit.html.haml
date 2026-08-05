@@ -1,0 +1,40 @@
+- content_for :title, "Edit Profile"
+%h1.text-3xl.font-bold.text-gray-900.mb-8 Edit Profile
+
+= form_with model: @user, url: profile_path, method: :patch, class: "space-y-8 max-w-lg" do |f|
+  .space-y-2
+    = f.label :name, "Full name", class: "block text-xl font-medium text-gray-900"
+    = f.text_field :name, autofocus: true,
+        class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+    - @user.errors[:name].each do |msg|
+      %p.text-lg.text-red-700= msg
+
+  .space-y-2
+    = f.label :email, "Email address", class: "block text-xl font-medium text-gray-900"
+    = f.email_field :email,
+        class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+    - @user.errors[:email].each do |msg|
+      %p.text-lg.text-red-700= msg
+
+  .space-y-2
+    = f.label :mobile_number, "Mobile number", class: "block text-xl font-medium text-gray-900"
+    = f.telephone_field :mobile_number, placeholder: "5551234567", maxlength: 10, inputmode: "numeric", pattern: "[0-9]{10}",
+        class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+    - @user.errors[:mobile_number].each do |msg|
+      %p.text-lg.text-red-700= msg
+
+  .space-y-2
+    = f.label :password, "New password (leave blank to keep current)", class: "block text-xl font-medium text-gray-900"
+    = f.password_field :password,
+        class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+    - @user.errors[:password]&.each do |msg|
+      %p.text-lg.text-red-700= msg
+
+  .space-y-2
+    = f.label :password_confirmation, "Confirm new password", class: "block text-xl font-medium text-gray-900"
+    = f.password_field :password_confirmation,
+        class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+
+  .flex.gap-4
+    = f.submit "Save Changes", class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"
+    = link_to "Cancel", root_path, class: "px-6 py-3 text-lg font-medium text-gray-900 underline"

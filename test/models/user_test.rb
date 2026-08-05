@@ -32,6 +32,39 @@ class UserTest < ActiveSupport::TestCase
     assert_includes u.errors[:email], "has already been taken"
   end
 
+  test "mobile_number is optional" do
+    u = valid_user
+    u.mobile_number = nil
+    assert u.valid?
+  end
+
+  test "mobile_number accepts exactly 10 digits" do
+    u = valid_user
+    u.mobile_number = "5551234567"
+    assert u.valid?
+  end
+
+  test "mobile_number rejects non-numeric characters" do
+    u = valid_user
+    u.mobile_number = "555-123-4567"
+    assert_not u.valid?
+    assert_includes u.errors[:mobile_number], "must be exactly 10 digits, no spaces or symbols"
+  end
+
+  test "mobile_number rejects a value that is too short" do
+    u = valid_user
+    u.mobile_number = "12345"
+    assert_not u.valid?
+    assert_includes u.errors[:mobile_number], "must be exactly 10 digits, no spaces or symbols"
+  end
+
+  test "mobile_number rejects a value that is too long" do
+    u = valid_user
+    u.mobile_number = "15551234567"
+    assert_not u.valid?
+    assert_includes u.errors[:mobile_number], "must be exactly 10 digits, no spaces or symbols"
+  end
+
   test "has_secure_password authenticates correctly" do
     u = users(:prod_admin)
     assert u.authenticate("password")

@@ -35,6 +35,12 @@ User
 
 All return `403 Access denied` (plain text) on failure.
 
+## Self-service profile
+
+Any logged-in user can edit their own name, email, mobile number, and password at `/profile/edit` (`ProfilesController`, scoped to `current_user` — no `:id` param, so a user can never target another user's record). The username link in the nav bar (top right) points here. Cannot change the `superadmin` flag or location assignments — that stays superadmin-only via `Admin::UsersController`.
+
+`mobile_number` is optional and, when present, must be exactly 10 digits (no spaces, dashes, or country code) — validated by `User::MOBILE_NUMBER_FORMAT`.
+
 ## Post-login routing (HomeController)
 
 1. Superadmin with no location assignments → redirect to `/admin`

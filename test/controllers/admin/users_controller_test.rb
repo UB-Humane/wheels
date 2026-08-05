@@ -197,6 +197,14 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "update sets mobile_number" do
+    login_as_superadmin
+    user = users(:no_location_user)
+    patch admin_user_path(user), params: { user: { name: user.name, email: user.email, mobile_number: "5551234567" } }
+    assert_redirected_to admin_users_path
+    assert_equal "5551234567", user.reload.mobile_number
+  end
+
   # --- destroy ---
 
   test "destroy requires superadmin" do
