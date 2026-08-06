@@ -50,7 +50,7 @@
             %select{name: "production_access_role[#{production.id}]",
                 class: "px-3 py-2 text-lg border-2 border-gray-400 bg-white"}
               - UserProduction::ROLES.each do |role|
-                %option{value: role, selected: (assigned&.dig(:role) || "volunteer") == role}= role.capitalize
+                %option{value: role, selected: (assigned&.dig(:role) || "volunteer") == role}= role.titleize
 
     - if distributions.any?
       %fieldset.space-y-3
@@ -65,7 +65,7 @@
             %select{name: "distribution_access_role[#{dist.id}]",
                 class: "px-3 py-2 text-lg border-2 border-gray-400 bg-white"}
               - UserDistribution::ROLES.each do |role|
-                %option{value: role, selected: (assigned&.dig(:role) || "volunteer") == role}= role.capitalize
+                %option{value: role, selected: (assigned&.dig(:role) || "volunteer") == role}= role.titleize
 
   .flex.gap-4
     = f.submit (user.persisted? ? "Save Changes" : "Add User"),

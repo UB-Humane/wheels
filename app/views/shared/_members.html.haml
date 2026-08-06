@@ -21,7 +21,7 @@
           - if existing
             .flex.items-center.gap-3
               = form_with url: member_update_path.call(existing), method: :patch, class: "flex items-center gap-2" do |f|
-                = f.select :role, roles.map { |r| [r.capitalize, r] }, { selected: existing.role },
+                = f.select :role, roles.map { |r| [r.titleize, r] }, { selected: existing.role },
                     class: "px-3 py-2 text-lg border-2 border-gray-400 bg-white",
                     onchange: "this.form.requestSubmit(); this.nextElementSibling.classList.remove('hidden')"
                 %span.hidden.text-gray-400{"aria-hidden": "true"}
@@ -34,7 +34,7 @@
           - else
             = form_with url: members_create_path, method: :post, class: "flex items-center gap-3" do |f|
               = f.hidden_field :user_id, value: user.id
-              = f.select :role, roles.map { |r| [r.capitalize, r] },
+              = f.select :role, roles.map { |r| [r.titleize, r] },
                   {}, class: "px-3 py-2 text-lg border-2 border-gray-400 bg-white"
               = f.submit "Add", class: "px-4 py-2 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"
   - elsif params[:member_query].present?
@@ -51,7 +51,7 @@
               %p.text-lg.text-gray-500= membership.user.email
             .flex.items-center.gap-3
               = form_with url: member_update_path.call(membership), method: :patch, class: "flex items-center gap-2" do |f|
-                = f.select :role, roles.map { |r| [r.capitalize, r] }, { selected: membership.role },
+                = f.select :role, roles.map { |r| [r.titleize, r] }, { selected: membership.role },
                     class: "px-3 py-2 text-lg border-2 border-gray-400 bg-white",
                     onchange: "this.form.requestSubmit(); this.nextElementSibling.classList.remove('hidden')"
                 %span.hidden.text-gray-400{"aria-hidden": "true"}
