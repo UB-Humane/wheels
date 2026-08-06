@@ -87,6 +87,13 @@ class DonorsControllerTest < ActionDispatch::IntegrationTest
     assert_empty assigns(:donors)
   end
 
+  test "nav includes Delivery and Your Tickets links, matching the rest of the app" do
+    login_as_prod_admin
+    get production_donors_path(production)
+    assert_select "a[href=?]", delivery_production_path(production), text: "Delivery"
+    assert_select "a[href=?]", your_tickets_production_path(production), text: "Your Tickets"
+  end
+
   # --- new ---
 
   test "new requires authentication" do

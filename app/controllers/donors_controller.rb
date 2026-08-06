@@ -1,8 +1,11 @@
 class DonorsController < ApplicationController
+  include ProductionNav
+
   before_action :set_production
   before_action :check_access
   before_action :require_admin_access
   before_action :set_location_nav
+  before_action :set_active_tab
   before_action :set_donor, only: [ :edit, :update ]
 
   def index
@@ -63,15 +66,8 @@ class DonorsController < ApplicationController
     render plain: "Access denied", status: :forbidden unless production_admin?(@production)
   end
 
-  def set_location_nav
-    @location_name           = @production.name
-    @location_path           = tickets_production_path(@production)
-    @location_admin          = production_admin?(@production)
-    @location_users_path     = users_production_path(@production)
-    @location_inventory_path = inventory_production_path(@production)
-    @location_donors_path    = production_donors_path(@production)
-    @location_show_tickets   = true
-    @location_active         = :donors
+  def set_active_tab
+    @location_active = :donors
   end
 
   def set_donor

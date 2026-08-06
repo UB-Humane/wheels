@@ -16,6 +16,7 @@ Each type has its own dashboard controller, join table, and join model. Adding a
   - `GET /productions/:id/your_tickets` — dashboard covering `pending`/`ready_for_delivery`/`taken_up` (`BikeRequest::MECHANIC_STATUSES`), scoped to requests where `owner == current_user`. 403s for anyone who isn't a `master_mechanic` or `admin` (or superadmin) at that production
   - `GET /productions/:id/users` — member management (admin only)
 - Currently one record (`Main Production`)
+- Nav-bar setup (`@location_name`, `@location_show_delivery`, `@location_show_your_tickets`, etc. — everything the layout's nav needs except `@location_active`, which each action/controller sets itself) lives in `ProductionNav` (`app/controllers/concerns/production_nav.rb`), included by both `ProductionsController` and `DonorsController` (donors is a full CRUD resource nested under productions, not a single-action tab, so it can't just become another `ProductionsController` action — see the concern instead). Any controller that renders inside a production's nav needs both `@production` set and this concern included; a controller with its own hand-rolled copy will silently drift out of sync as new nav fields get added (this happened once already — `DonorsController` was missing `@location_show_delivery`/`@location_show_your_tickets`, which quietly dropped those tabs only on Donors pages).
 
 ### Delivery-only host
 
