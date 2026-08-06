@@ -81,7 +81,12 @@ Rails.application.configure do
   # Enable DNS rebinding protection and other `Host` header attacks.
   # Allow the base host (from APP_HOST) and all its subdomains (e.g. delivery.<APP_HOST>).
   # Stays permissive (unset) if APP_HOST isn't configured, rather than blocking every request.
-  config.hosts << ".#{ENV["APP_HOST"]}" if ENV["APP_HOST"].present?
+  # Always allow localhost too — unlike development, production doesn't auto-permit it once
+  # config.hosts is set, and running the production build locally (e.g. via Docker) is routine.
+  if ENV["APP_HOST"].present?
+    config.hosts << ".#{ENV["APP_HOST"]}"
+    config.hosts << "localhost"
+  end
   #
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
