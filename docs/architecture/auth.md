@@ -15,6 +15,8 @@ Custom session-based auth using `has_secure_password` (bcrypt). No Devise.
 - `GET /auth/google_oauth2/callback` → `SessionsController#omniauth` — matches a `User` by the email Google verifies (`auth.info.email`); if none exists, auto-creates one (`name` from Google, falling back to the email if Google gives no name; a random unusable password to satisfy `has_secure_password`/`password_digest NOT NULL`). New accounts have no location assignments until a superadmin assigns them.
 - `GET /auth/failure` → `SessionsController#omniauth_failure` — redirects to `/login` with an alert on any OmniAuth failure (denied consent, etc.)
 
+`SessionsController` stays fully reachable on the delivery-only host (`docs/architecture/locations.md`), so login works there too — but Google validates the callback URL per host. Any new host that needs to serve login (e.g. `delivery.<APP_HOST>` once a production domain exists) must have its own `.../auth/google_oauth2/callback` URL added to the OAuth client's Authorized redirect URIs in Google Cloud Console — this is a manual step, not something the app can do for itself.
+
 ## Authorization
 
 Access is determined entirely by location assignments, not a global role.

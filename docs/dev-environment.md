@@ -24,6 +24,17 @@ bin/dev    # Rails server + Tailwind watcher via foreman
 Loaded from `.env` (gitignored) via the `dotenv` gem — see `.env.example` for the required keys. Changes to `.env` or to `config/initializers/*.rb` require a full restart of `bin/dev`, not just a page reload, since the Rack middleware stack is only built once at boot.
 
 - `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` — Google Cloud Console OAuth 2.0 Client, used for "Sign in with Google" (`docs/architecture/auth.md`). The client's Authorized redirect URIs must include `http://localhost:3000/auth/google_oauth2/callback` for local dev (adjust host/port to match however you're running the app).
+- `APP_HOST` — production-only, the app's base host (see "Delivery-only host" in `docs/architecture/locations.md`). Not used in development — that's hardcoded to `testing.wheelsforworkers.org` — or in test.
+
+## Testing the delivery-only host locally
+
+`testing.wheelsforworkers.org` and `delivery.testing.wheelsforworkers.org` need `/etc/hosts` entries pointing at `127.0.0.1`:
+
+```
+127.0.0.1 testing.wheelsforworkers.org delivery.testing.wheelsforworkers.org
+```
+
+`/etc/hosts` doesn't carry a port, so the `:3000` must be in the URL you visit: `http://testing.wheelsforworkers.org:3000`, not just `http://testing.wheelsforworkers.org`.
 
 ## Common commands
 

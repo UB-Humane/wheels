@@ -40,6 +40,9 @@ Rails.application.configure do
   # Set localhost to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
 
+  # Allow the delivery-kiosk base host and all its subdomains (e.g. delivery.testing.wheelsforworkers.org).
+  config.hosts << ".testing.wheelsforworkers.org"
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

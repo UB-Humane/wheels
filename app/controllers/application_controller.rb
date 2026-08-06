@@ -4,8 +4,15 @@ class ApplicationController < ActionController::Base
   stale_when_importmap_changes
 
   before_action :require_authentication
+  before_action :restrict_to_delivery_only_host
 
-  helper_method :current_user, :production_admin?, :distribution_admin?, :production_master_mechanic?, :requestor_for?
+  helper_method :current_user, :production_admin?, :distribution_admin?, :production_master_mechanic?, :requestor_for?, :delivery_only_host?
+
+  def self.delivery_only_host
+    return nil if Rails.env.production? && ENV["APP_HOST"].blank?
+    base = Rails.env.production? ? ENV["APP_HOST"] : "testing.wheelsforworkers.org"
+    "delivery.#{base}"
+  end
 
   private
 
@@ -15,6 +22,22 @@ class ApplicationController < ActionController::Base
 
   def require_authentication
     redirect_to login_path unless current_user
+  end
+
+  def delivery_only_host?
+    self.class.delivery_only_host.present? && request.host == self.class.delivery_only_host
+  end
+
+  def restrict_to_delivery_only_host
+    return unless delivery_only_host?
+    return if delivery_only_host_allowed?
+    redirect_to delivery_production_path(Production.first)
+  end
+
+  def delivery_only_host_allowed?
+    controller_name == "sessions" ||
+      (controller_name == "productions" && action_name == "delivery") ||
+      (controller_name == "bike_requests" && action_name == "update")
   end
 
   def require_superadmin

@@ -26,22 +26,22 @@
           - if @location_name
             .w-px.h-6.bg-gray-400.mx-1
             %span.px-3.text-lg.font-semibold.text-gray-900= @location_name
-            - if @location_show_your_tickets
+            - if @location_show_your_tickets && !delivery_only_host?
               = link_to "Your Tickets", @location_your_tickets_path,
                   class: "ml-2 px-4 py-2 text-lg font-medium #{@location_active == :your_tickets ? 'bg-gray-900 text-white' : 'text-gray-900'}"
-            - if @location_show_tickets
+            - if @location_show_tickets && !delivery_only_host?
               = link_to "Bike Tickets", @location_path,
                   class: "#{'ml-2' unless @location_show_your_tickets} px-4 py-2 text-lg font-medium #{@location_active == :tickets ? 'bg-gray-900 text-white' : 'text-gray-900'}"
             - if @location_show_delivery
               = link_to "Delivery", @location_delivery_path,
-                  class: "px-4 py-2 text-lg font-medium #{@location_active == :delivery ? 'bg-gray-900 text-white' : 'text-gray-900'}"
-            - if @location_inventory_path
+                  class: "#{'ml-2' if delivery_only_host?} px-4 py-2 text-lg font-medium #{@location_active == :delivery ? 'bg-gray-900 text-white' : 'text-gray-900'}"
+            - if @location_inventory_path && !delivery_only_host?
               = link_to "Inventory", @location_inventory_path,
                   class: "px-4 py-2 text-lg font-medium #{@location_active == :inventory ? 'bg-gray-900 text-white' : 'text-gray-900'}"
-            - if @location_donors_path
+            - if @location_donors_path && !delivery_only_host?
               = link_to "Donors", @location_donors_path,
                   class: "px-4 py-2 text-lg font-medium #{@location_active == :donors ? 'bg-gray-900 text-white' : 'text-gray-900'}"
-            - if @location_admin
+            - if @location_admin && !delivery_only_host?
               = link_to "Manage Users", @location_users_path,
                   class: "px-4 py-2 text-lg font-medium #{@location_active == :users ? 'bg-gray-900 text-white' : 'text-gray-900'}"
         .flex.items-center.gap-8

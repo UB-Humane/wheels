@@ -17,6 +17,10 @@ Each type has its own dashboard controller, join table, and join model. Adding a
   - `GET /productions/:id/users` — member management (admin only)
 - Currently one record (`Main Production`)
 
+### Delivery-only host
+
+`ApplicationController.delivery_only_host` (`delivery.` + the base host — hardcoded `testing.wheelsforworkers.org` outside production, `ENV["APP_HOST"]` in production) is a dedicated kiosk hostname for the delivery pickup station. A `before_action` (`restrict_to_delivery_only_host`) redirects every request on that host to `delivery_production_path(Production.first)` except `SessionsController` (login must still work), `ProductionsController#delivery` (the page itself), and `BikeRequestsController#update` (the action buttons that live on that page) — applies to everyone, including superadmins, since it's a restriction on what that host/device shows, not a per-user permission. The nav bar also hides every other location link (`Bike Tickets`, `Your Tickets`, `Inventory`, `Donors`, `Manage Users`) on this host via the `delivery_only_host?` helper. In production, if `APP_HOST` isn't set, the restriction doesn't activate rather than blocking every request.
+
 ## Distribution
 
 - Model: `Distribution` — `app/models/distribution.rb`; has `name` and `address`
