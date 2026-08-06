@@ -24,6 +24,22 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "nav renders a mobile menu alongside the desktop links, showing the active tab and grouping profile/logout below a divider" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get tickets_production_path(productions(:main_production))
+    assert_select "div.hidden.lg\\:flex a", text: "Bike Tickets"
+    assert_select "div.lg\\:hidden[data-controller=nav-menu]" do
+      assert_select "button[data-nav-menu-target=button]", text: /Bike Tickets/
+      assert_select "div[data-nav-menu-target=panel][hidden]" do
+        assert_select "a", text: "Delivery"
+        assert_select "div.border-t" do
+          assert_select "a", text: users(:prod_admin).name
+          assert_select "form button", text: "Log out"
+        end
+      end
+    end
+  end
+
   test "show defaults to pending tab" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     get tickets_production_path(productions(:main_production))

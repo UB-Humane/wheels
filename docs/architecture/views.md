@@ -2,7 +2,9 @@
 
 All views are HAML. Tailwind CSS v4 compiled by `tailwindcss-rails` to `app/assets/builds/tailwind.css`.
 
-The layout (`application.html.haml`) renders the nav bar (app name + current user + logout) for logged-in users and injects flash messages. The current user's name links to `/profile/edit` for self-service editing (see `docs/architecture/auth.md`), with a small inline SVG pencil icon — the one deliberate exception to DESIGN.md's icon-avoidance rule, kept as a minimal edit affordance next to the name rather than a second text link.
+The layout (`application.html.haml`) renders the nav bar (home icon, location name + tab links, current user + logout) for logged-in users and injects flash messages. The current user's name links to `/profile/edit` for self-service editing (see `docs/architecture/auth.md`), with a small inline SVG pencil icon — the one deliberate exception to DESIGN.md's icon-avoidance rule, kept as a minimal edit affordance next to the name rather than a second text link.
+
+Below the `lg` breakpoint, the tab links and the profile/logout links collapse into a single dropdown menu (button + toggled panel) instead of two separate areas — see "Mobile nav" in `DESIGN.md`. `app/javascript/controllers/nav_menu_controller.js` handles the toggle/outside-click-close, mirroring `owner_search_controller.js`'s existing dropdown pattern.
 
 ## Design
 

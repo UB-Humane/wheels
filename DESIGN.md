@@ -57,12 +57,18 @@ Minimum font size for any interactive element is `text-lg`. Never go smaller on 
 
 ## Navigation
 
-The nav bar is rendered by the layout for any logged-in user. It contains:
-- App name ("Wheels") as a bold link to root — `text-2xl font-bold`
-- Current user's name — `text-lg text-gray-700`
+The nav bar is rendered by the layout for any logged-in user. It contains, left to right:
+- Home icon, linking to root
+- Current location name (production or distribution), when on a location dashboard
+- That location's tab links (Bike Tickets, Delivery, Your Tickets, Inventory, Donors, Manage Users — whichever apply)
+- Current user's name, linking to `/profile/edit` — `text-lg text-gray-700`
 - Log out — underlined text link, no button styling
 
 The nav bar uses a thick bottom border (`border-b-2 border-gray-900`) as the only separator. No background color, no shadow.
+
+### Mobile nav
+
+Below the `lg` breakpoint, the tab links row and the profile/logout links both hide (`hidden lg:flex`), replaced by a single dropdown menu (`lg:hidden`): a button styled as a bordered box (`border-2 border-gray-900 bg-white`, showing the active tab's label, or the user's name when there's no location context) that toggles a panel below it. The panel repeats the tab links, then a `border-t border-gray-900` divider, then the profile link and Log out — same items as desktop, just grouped into one menu instead of two areas. `app/javascript/controllers/nav_menu_controller.js` handles toggling and closing on an outside click (same pattern as the existing owner-search dropdown). Home icon and location name stay visible at every width.
 
 ---
 

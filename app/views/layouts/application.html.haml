@@ -18,6 +18,16 @@
     = javascript_importmap_tags
   %body.bg-white.min-h-screen
     - if current_user
+      - nav_links = []
+      - if @location_name
+        - nav_links << ["Your Tickets", @location_your_tickets_path, :your_tickets] if @location_show_your_tickets && !delivery_only_host?
+        - nav_links << ["Bike Tickets", @location_path, :tickets] if @location_show_tickets && !delivery_only_host?
+        - nav_links << ["Delivery", @location_delivery_path, :delivery] if @location_show_delivery
+        - nav_links << ["Inventory", @location_inventory_path, :inventory] if @location_inventory_path && !delivery_only_host?
+        - nav_links << ["Donors", @location_donors_path, :donors] if @location_donors_path && !delivery_only_host?
+        - nav_links << ["Manage Users", @location_users_path, :users] if @location_admin && !delivery_only_host?
+      - active_link = nav_links.find { |_, _, key| key == @location_active }
+      - mobile_trigger_label = active_link&.first || current_user.name
       %nav.border-b-2.border-gray-900.px-6.py-4.flex.items-center.justify-between
         .flex.items-center
           = link_to root_path, class: "px-3 text-gray-900 hover:text-gray-600 transition-colors", aria: { label: "Home" } do
@@ -26,30 +36,28 @@
           - if @location_name
             .w-px.h-6.bg-gray-400.mx-1
             %span.px-3.text-lg.font-semibold.text-gray-900= @location_name
-            - if @location_show_your_tickets && !delivery_only_host?
-              = link_to "Your Tickets", @location_your_tickets_path,
-                  class: "ml-2 px-4 py-2 text-lg font-medium #{@location_active == :your_tickets ? 'bg-gray-900 text-white' : 'text-gray-900'}"
-            - if @location_show_tickets && !delivery_only_host?
-              = link_to "Bike Tickets", @location_path,
-                  class: "#{'ml-2' unless @location_show_your_tickets} px-4 py-2 text-lg font-medium #{@location_active == :tickets ? 'bg-gray-900 text-white' : 'text-gray-900'}"
-            - if @location_show_delivery
-              = link_to "Delivery", @location_delivery_path,
-                  class: "#{'ml-2' if delivery_only_host?} px-4 py-2 text-lg font-medium #{@location_active == :delivery ? 'bg-gray-900 text-white' : 'text-gray-900'}"
-            - if @location_inventory_path && !delivery_only_host?
-              = link_to "Inventory", @location_inventory_path,
-                  class: "px-4 py-2 text-lg font-medium #{@location_active == :inventory ? 'bg-gray-900 text-white' : 'text-gray-900'}"
-            - if @location_donors_path && !delivery_only_host?
-              = link_to "Donors", @location_donors_path,
-                  class: "px-4 py-2 text-lg font-medium #{@location_active == :donors ? 'bg-gray-900 text-white' : 'text-gray-900'}"
-            - if @location_admin && !delivery_only_host?
-              = link_to "Manage Users", @location_users_path,
-                  class: "px-4 py-2 text-lg font-medium #{@location_active == :users ? 'bg-gray-900 text-white' : 'text-gray-900'}"
-        .flex.items-center.gap-8
+            - if nav_links.any?
+              .hidden.lg:flex.items-center.ml-2
+                - nav_links.each do |label, path, key|
+                  = link_to label, path, class: "px-4 py-2 text-lg font-medium #{@location_active == key ? 'bg-gray-900 text-white' : 'text-gray-900'}"
+        .hidden.lg:flex.items-center.gap-8
           = link_to edit_profile_path, class: "flex items-center gap-2 text-lg text-gray-700 hover:text-gray-900 transition-colors" do
             %span= current_user.name
             %svg{xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", fill: "currentColor", width: "16", height: "16", aria: { hidden: "true" }}
               %path{d: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"}
           = button_to "Log out", logout_path, method: :delete, class: "text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
+        .lg:hidden.relative{data: { controller: "nav-menu", action: "click@window->nav-menu#close" }}
+          %button{type: "button", "aria-haspopup": "true", "aria-expanded": "false",
+              data: { "nav-menu-target": "button", action: "click->nav-menu#toggle" },
+              class: "px-4 py-2 text-lg font-medium text-gray-900 border-2 border-gray-900 bg-white text-center cursor-pointer"}
+            = mobile_trigger_label
+            %span.text-gray-400.ml-1 ▾
+          .absolute.right-0.z-10.mt-1.min-w-48.bg-white.border-2.border-gray-900{hidden: true, data: { "nav-menu-target": "panel" }}
+            - nav_links.each do |label, path, key|
+              = link_to label, path, class: "block px-4 py-3 text-lg font-medium whitespace-nowrap #{@location_active == key ? 'bg-gray-900 text-white' : 'text-gray-900 hover:bg-gray-100'}"
+            .border-t.border-gray-900
+              = link_to current_user.name, edit_profile_path, class: "block px-4 py-3 text-lg font-medium text-gray-700 hover:bg-gray-100 whitespace-nowrap"
+              = button_to "Log out", logout_path, method: :delete, class: "block w-full text-left px-4 py-3 text-lg font-medium text-gray-900 hover:bg-gray-100 bg-transparent border-0 cursor-pointer"
     - if flash[:notice]
       .px-6.py-3.bg-green-100.border-b.border-green-300.text-green-900.text-lg= flash[:notice]
     - if flash[:alert]
