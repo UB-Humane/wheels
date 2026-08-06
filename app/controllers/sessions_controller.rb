@@ -1,5 +1,6 @@
 class SessionsController < ApplicationController
   skip_before_action :require_authentication
+  skip_before_action :require_mobile_number
 
   def new
     redirect_to root_path if current_user

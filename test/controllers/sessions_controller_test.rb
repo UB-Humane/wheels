@@ -65,6 +65,17 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_nil session[:user_id]
   end
 
+  test "DELETE /logout works even when the user has no mobile number" do
+    user = users(:prod_admin)
+    user.update_columns(mobile_number: nil)
+    post login_path, params: { email: user.email, password: "password" }
+    assert_not_nil session[:user_id]
+
+    delete logout_path
+    assert_redirected_to login_path
+    assert_nil session[:user_id]
+  end
+
   # --- GET /auth/google_oauth2/callback ---
 
   test "omniauth callback logs in an existing user matched by email" do
