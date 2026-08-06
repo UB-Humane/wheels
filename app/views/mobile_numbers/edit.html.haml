@@ -1,0 +1,11 @@
+- content_for :title, "Add Your Mobile Number"
+.max-w-md.mx-auto.mt-16
+  %h1.text-4xl.font-bold.text-gray-900.mb-10 What's your mobile number?
+  = form_with model: @user, url: mobile_number_path, method: :patch, class: "space-y-6" do |f|
+    .space-y-2
+      = f.label :mobile_number, "Mobile number", class: "block text-xl font-medium text-gray-900"
+      = f.telephone_field :mobile_number, placeholder: "5551234567", maxlength: 10, inputmode: "numeric", pattern: "[0-9]{10}", autofocus: true,
+          class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+      - @user.errors[:mobile_number].each do |msg|
+        %p.text-lg.text-red-700= msg
+    = f.submit "Save", class: "w-full py-4 text-xl font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"

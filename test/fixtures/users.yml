@@ -5,45 +5,53 @@ superadmin:
   email: superadmin@example.com
   password_digest: <%= BCrypt::Password.create("password", cost: 4) %>
   superadmin: true
+  mobile_number: "5550000001"
 
 prod_admin:
   name: Production Admin
   email: prod_admin@example.com
   password_digest: <%= BCrypt::Password.create("password", cost: 4) %>
   superadmin: false
+  mobile_number: "5550000002"
 
 dist_user:
   name: Distribution User
   email: dist_user@example.com
   password_digest: <%= BCrypt::Password.create("password", cost: 4) %>
   superadmin: false
+  mobile_number: "5550000003"
 
 multi_user:
   name: Multi Location User
   email: multi_user@example.com
   password_digest: <%= BCrypt::Password.create("password", cost: 4) %>
   superadmin: false
+  mobile_number: "5550000004"
 
 superadmin_with_location:
   name: Super Admin With Location
   email: superadmin_loc@example.com
   password_digest: <%= BCrypt::Password.create("password", cost: 4) %>
   superadmin: true
+  mobile_number: "5550000005"
 
 no_location_user:
   name: No Location User
   email: no_location@example.com
   password_digest: <%= BCrypt::Password.create("password", cost: 4) %>
   superadmin: false
+  mobile_number: "5550000006"
 
 prod_volunteer:
   name: Production Volunteer
   email: prod_volunteer@example.com
   password_digest: <%= BCrypt::Password.create("password", cost: 4) %>
   superadmin: false
+  mobile_number: "5550000007"
 
 master_mechanic_user:
   name: Master Mechanic
   email: master_mechanic@example.com
   password_digest: <%= BCrypt::Password.create("password", cost: 4) %>
   superadmin: false
+  mobile_number: "5550000008"

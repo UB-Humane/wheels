@@ -75,4 +75,54 @@ class ApplicationControllerTest < ActionDispatch::IntegrationTest
     get tickets_production_path(productions(:main_production))
     assert_response :success
   end
+
+  # --- require_mobile_number ---
+
+  test "a user without a mobile number is redirected to add one" do
+    user = users(:prod_admin)
+    user.update_columns(mobile_number: nil)
+    login_as(user)
+    get tickets_production_path(productions(:main_production))
+    assert_redirected_to edit_mobile_number_path
+  end
+
+  test "a user without a mobile number is redirected from the admin panel" do
+    user = users(:superadmin)
+    user.update_columns(mobile_number: nil)
+    login_as(user)
+    get admin_root_path
+    assert_redirected_to edit_mobile_number_path
+  end
+
+  test "a user without a mobile number is redirected from root" do
+    user = users(:prod_admin)
+    user.update_columns(mobile_number: nil)
+    login_as(user)
+    get root_path
+    assert_redirected_to edit_mobile_number_path
+  end
+
+  test "a user with a mobile number is not redirected" do
+    login_as(users(:prod_admin))
+    get tickets_production_path(productions(:main_production))
+    assert_response :success
+  end
+
+  test "on the delivery-only host, a numberless user is sent to add a number, not looped to delivery" do
+    host! DELIVERY_HOST
+    user = users(:prod_admin)
+    user.update_columns(mobile_number: nil)
+    login_as(user)
+    get delivery_production_path(productions(:main_production))
+    assert_redirected_to edit_mobile_number_path
+  end
+
+  test "the mobile number page itself renders on the delivery-only host" do
+    host! DELIVERY_HOST
+    user = users(:prod_admin)
+    user.update_columns(mobile_number: nil)
+    login_as(user)
+    get edit_mobile_number_path
+    assert_response :success
+  end
 end

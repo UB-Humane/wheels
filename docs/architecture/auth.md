@@ -49,7 +49,11 @@ All return `403 Access denied` (plain text) on failure.
 
 Any logged-in user can edit their own name, email, mobile number, and password at `/profile/edit` (`ProfilesController`, scoped to `current_user` — no `:id` param, so a user can never target another user's record). The username link in the nav bar (top right) points here. Cannot change the `superadmin` flag or location assignments — that stays superadmin-only via `Admin::UsersController`.
 
-`mobile_number` is optional and, when present, must be exactly 10 digits (no spaces, dashes, or country code) — validated by `User::MOBILE_NUMBER_FORMAT`.
+`mobile_number` is optional at the model level (`allow_blank: true`, so `/profile/edit` and the admin user form can still leave it blank) and, when present, must be exactly 10 digits (no spaces, dashes, or country code) — validated by `User::MOBILE_NUMBER_FORMAT`.
+
+## Mobile number requirement
+
+`require_mobile_number` (`ApplicationController`, runs right after `require_authentication`, before `restrict_to_delivery_only_host`) redirects any logged-in user with a blank `mobile_number` to `/mobile_number/edit` (`MobileNumbersController`) — a single-field page that enforces presence itself (the model validation stays optional, since it's shared with `/profile/edit`). Applies app-wide, including `/admin`, with no superadmin exemption. `MobileNumbersController` skips this callback on itself, and is in the delivery-only host's allow-list, so it doesn't loop.
 
 ## Post-login routing (HomeController)
 

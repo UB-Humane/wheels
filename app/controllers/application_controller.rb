@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   stale_when_importmap_changes
 
   before_action :require_authentication
+  before_action :require_mobile_number
   before_action :restrict_to_delivery_only_host
 
   helper_method :current_user, :production_admin?, :distribution_admin?, :production_master_mechanic?, :requestor_for?, :delivery_only_host?
@@ -24,6 +25,11 @@ class ApplicationController < ActionController::Base
     redirect_to login_path unless current_user
   end
 
+  def require_mobile_number
+    return unless current_user
+    redirect_to edit_mobile_number_path unless current_user.mobile_number.present?
+  end
+
   def delivery_only_host?
     self.class.delivery_only_host.present? && request.host == self.class.delivery_only_host
   end
@@ -36,6 +42,7 @@ class ApplicationController < ActionController::Base
 
   def delivery_only_host_allowed?
     controller_name == "sessions" ||
+      controller_name == "mobile_numbers" ||
       (controller_name == "productions" && action_name == "delivery") ||
       (controller_name == "bike_requests" && action_name == "update")
   end
