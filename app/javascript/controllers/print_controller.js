@@ -6,9 +6,10 @@ export default class extends Controller {
   printLabels() {
     const bikes = this.bikesValue, requestor = this.requestorValue, phone = this.phoneValue, due = this.dueValue
     var pages = []
-    bikes.forEach(function(b) {
+    bikes.forEach(function(b, i) {
       var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4]
       var lines = []
+      lines.push('<p style="font-size:11pt;color:#555;margin:0 0 4px">' + (i + 1) + '/' + bikes.length + '</p>')
       if (name) lines.push('<p style="font-size:18pt;font-weight:bold;margin:0">' + name + '</p>')
       var detail = type
       if (age) detail += ' &middot; Age ' + age
