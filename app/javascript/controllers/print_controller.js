@@ -1,23 +1,23 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { bikes: Array, requestor: String, phone: String, due: String }
+  static values = { bikes: Array, requestor: String, source: String, phone: String, due: String }
 
   printLabels() {
-    const bikes = this.bikesValue, requestor = this.requestorValue, phone = this.phoneValue, due = this.dueValue
+    const bikes = this.bikesValue, requestor = this.requestorValue, source = this.sourceValue, phone = this.phoneValue
     var pages = []
     bikes.forEach(function(b, i) {
       var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4]
       var lines = []
       lines.push('<p style="font-size:11pt;color:#555;margin:0 0 4px">' + (i + 1) + '/' + bikes.length + '</p>')
-      if (name) lines.push('<p style="font-size:18pt;font-weight:bold;margin:0">' + name + '</p>')
+      lines.push('<p style="font-size:12pt;font-weight:bold;margin:0">' + source + '</p>')
+      lines.push('<p style="font-size:11pt;color:#555;margin:2px 0">' + requestor + ' &middot; ' + phone + '</p>')
+      if (name) lines.push('<p style="font-size:18pt;font-weight:bold;margin:8px 0 0">' + name + '</p>')
       var detail = type
       if (age) detail += ' &middot; Age ' + age
       if (height) detail += ' &middot; ' + height
       lines.push('<p style="font-size:14pt;margin:4px 0">' + detail + '</p>')
       if (notes) lines.push('<p style="font-size:12pt;margin:4px 0">' + notes + '</p>')
-      lines.push('<p style="font-size:11pt;color:#555;margin:8px 0 0">' + requestor + ' &middot; ' + phone + '</p>')
-      lines.push('<p style="font-size:11pt;color:#555;margin:2px 0">Due ' + due + '</p>')
       pages.push('<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') + 'padding:12px">' + lines.join('') + '</div>')
     })
     var win = window.open('', '_blank', 'width=400,height=600')
@@ -26,7 +26,7 @@ export default class extends Controller {
   }
 
   printCard() {
-    const bikes = this.bikesValue, requestor = this.requestorValue, phone = this.phoneValue, due = this.dueValue
+    const bikes = this.bikesValue, requestor = this.requestorValue, source = this.sourceValue, phone = this.phoneValue, due = this.dueValue
     var rows = ''
     bikes.forEach(function(b, i) {
       var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4]
@@ -41,7 +41,8 @@ export default class extends Controller {
     })
     var html =
       '<div style="border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:14px">' +
-        '<div style="font-size:18pt;font-weight:bold">' + requestor + '</div>' +
+        '<div style="font-size:20pt;font-weight:bold">' + source + '</div>' +
+        '<div style="font-size:14pt;margin-top:2px">' + requestor + '</div>' +
         '<div style="font-size:13pt;color:#555;margin-top:3px">' + phone + ' &nbsp;&middot;&nbsp; Due ' + due + '</div>' +
       '</div>' +
       '<table style="width:100%;border-collapse:collapse">' + rows + '</table>'
