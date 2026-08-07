@@ -1,54 +1,48 @@
 requested_bike:
-  phone: "5555551234"
-  requestor_name: Alice Smith
   due_date: <%= 30.days.from_now.to_date %>
   status: 1
+  codename: quiet-otter
   distribution: downtown_dist
   production: main_production
   user: dist_user
 
 completed_bike:
-  phone: "5555559999"
-  requestor_name: Carol White
   due_date: <%= 10.days.from_now.to_date %>
   status: 2
+  codename: bright-river
   distribution: downtown_dist
   production: main_production
   user: dist_user
 
 pending_bike:
-  phone: "5555550011"
-  requestor_name: Bob Jones
   due_date: <%= 20.days.from_now.to_date %>
   status: 0
+  codename: swift-maple
   distribution: downtown_dist
   production: main_production
   user: dist_user
 
 denied_bike:
-  phone: "5555550022"
-  requestor_name: Dana Lee
   due_date: <%= 15.days.from_now.to_date %>
   status: 5
+  codename: gentle-cedar
   distribution: downtown_dist
   production: main_production
   user: dist_user
 
 archived_bike:
-  phone: "5555550033"
-  requestor_name: Eve Garcia
   due_date: <%= 25.days.from_now.to_date %>
   status: 6
   status_before_archival: 0
+  codename: happy-summit
   distribution: downtown_dist
   production: main_production
   user: dist_user
 
 taken_up_bike:
-  phone: "5555550044"
-  requestor_name: Frank Nguyen
   due_date: <%= 12.days.from_now.to_date %>
   status: 7
+  codename: bold-harbor
   distribution: downtown_dist
   production: main_production
   user: dist_user

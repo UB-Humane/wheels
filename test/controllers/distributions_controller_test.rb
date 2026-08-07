@@ -65,7 +65,7 @@ class DistributionsControllerTest < ActionDispatch::IntegrationTest
   test "show only returns bike requests belonging to this distribution" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
     other_request = BikeRequest.create!(
-      phone: "5550000002", requestor_name: "Other", due_date: 10.days.from_now,
+      due_date: 10.days.from_now,
       distribution: distributions(:uptown_dist),
       production: productions(:main_production), user: users(:dist_user)
     )

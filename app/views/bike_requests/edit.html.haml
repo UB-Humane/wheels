@@ -8,18 +8,6 @@
         - @bike_request.errors.full_messages.each do |msg|
           %p.text-lg.text-red-700= msg
     .space-y-2
-      = f.label :phone, "Phone number", class: "block text-xl font-medium text-gray-900"
-      = f.telephone_field :phone, placeholder: "10 digits, no hyphens", class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
-      - @bike_request.errors[:phone].each do |msg|
-        %p.text-lg.text-red-700= msg
-
-    .space-y-2
-      = f.label :requestor_name, "Requestor name", class: "block text-xl font-medium text-gray-900"
-      = f.text_field :requestor_name, class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
-      - @bike_request.errors[:requestor_name].each do |msg|
-        %p.text-lg.text-red-700= msg
-
-    .space-y-2
       = f.label :due_date, "Due date", class: "block text-xl font-medium text-gray-900"
       = f.date_field :due_date, class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
       - @bike_request.errors[:due_date].each do |msg|

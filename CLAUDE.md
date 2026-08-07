@@ -12,9 +12,9 @@ Target audience: ages 25–70, including people uncomfortable with computers. Th
 
 ### Bike requests
 
-Each bike request is for **one person**. A distribution center submits it on behalf of that person. The production center (currently only one, hardcoded to `Production.first`) fulfills it.
+Each bike request belongs to its `requestor` (the submitting user) — no separate recipient name/phone is collected; `requestor.name`/`requestor.mobile_number` is what's shown everywhere a requestor's identity or contact info is needed. The production center (currently only one, hardcoded to `Production.first`) fulfills it.
 
-Status flow: **requested → pending → completed → delivered → distributed**. Back-transitions are allowed at each step. Marking pending sets the claiming production worker as the assignee.
+Status flow: **requested → pending → ready_for_delivery → taken_up → delivered → distributed**, with `denied` (from `requested`) and `archived` (from most other statuses) as side states. Back-transitions are allowed at each step. Marking pending sets the claiming production worker as the assignee.
 
 Each card will eventually have a print button (not yet implemented — keep the card layout print-friendly).
 

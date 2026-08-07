@@ -68,7 +68,7 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     other_prod = Production.create!(name: "Other Production")
     other_request = BikeRequest.create!(
-      phone: "5550000001", requestor_name: "Other", due_date: 10.days.from_now,
+      due_date: 10.days.from_now,
       distribution: distributions(:downtown_dist),
       production: other_prod, user: users(:dist_user)
     )

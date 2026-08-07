@@ -40,8 +40,6 @@ class DistributionTest < ActiveSupport::TestCase
     production = productions(:main_production)
     user = users(:dist_user)
     br = BikeRequest.new(
-      phone: "5555552222",
-      requestor_name: "Test",
       due_date: Date.today + 7,
       distribution: dist,
       production: production,

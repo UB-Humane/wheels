@@ -2,6 +2,9 @@ class BikeRequest < ApplicationRecord
   MAX_BIKES = 15
   DELIVERY_STATUSES = %w[ready_for_delivery taken_up delivered]
   MECHANIC_STATUSES = %w[pending ready_for_delivery taken_up]
+  CLOSED_STATUSES = %w[delivered distributed]
+  CODENAME_ADJECTIVES = Rails.root.join("lib/data/adjectives.txt").readlines(chomp: true).freeze
+  CODENAME_NOUNS = Rails.root.join("lib/data/nouns.txt").readlines(chomp: true).freeze
 
   belongs_to :distribution, optional: true
   belongs_to :production
@@ -14,11 +17,18 @@ class BikeRequest < ApplicationRecord
 
   enum :status, { pending: 0, requested: 1, ready_for_delivery: 2, delivered: 3, distributed: 4, denied: 5, archived: 6, taken_up: 7 }
 
-  validates :phone, presence: true, format: { with: /\A\d{10}\z/, message: "must be exactly 10 digits" }
-  validates :requestor_name, presence: true
   validates :due_date, presence: true
   validate :due_date_in_future, on: :create
   validate :owner_must_be_eligible
+
+  before_create :assign_codename
+
+  def self.generate_codename
+    loop do
+      codename = "#{CODENAME_ADJECTIVES.sample}-#{CODENAME_NOUNS.sample}"
+      break codename unless where(codename: codename).where.not(status: CLOSED_STATUSES).exists?
+    end
+  end
 
   def bikes_label_data
     bikes.map(&:label_data)
@@ -40,5 +50,9 @@ class BikeRequest < ApplicationRecord
     unless UserProduction.exists?(user_id: owner_id, production: production, role: UserProduction::OWNER_ROLES)
       errors.add(:owner, "must be a master mechanic or admin")
     end
+  end
+
+  def assign_codename
+    self.codename ||= self.class.generate_codename
   end
 end

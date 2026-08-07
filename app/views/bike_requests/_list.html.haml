@@ -12,13 +12,16 @@
       .px-6.py-5.space-y-4{class: card_border,
         data: { controller: "print",
                 "print-bikes-value":     req.bikes_label_data.to_json,
-                "print-requestor-value": req.requestor_name,
+                "print-requestor-value": req.user.name,
                 "print-source-value":    req.distribution&.name || "Production Request",
-                "print-phone-value":     req.phone,
+                "print-codename-value":  req.codename,
+                "print-phone-value":     req.user.mobile_number,
                 "print-due-value":       req.due_date.strftime("%-m/%-d/%Y") }}
         .flex.items-start.justify-between.gap-4
           .space-y-1
-            %p.text-2xl.font-bold.text-gray-900= req.distribution&.name || "Production Request"
+            .flex.items-baseline.gap-2
+              %p.text-2xl.font-bold.text-gray-900= req.distribution&.name || "Production Request"
+              %p.text-lg.text-gray-500= req.codename
             - if req.owner.present?
               %p.text-lg.text-gray-500
                 Owned by
@@ -27,8 +30,10 @@
               %p.text-lg.text-gray-500
                 Picked up by
                 = req.taker.name
-            %p.text-lg.text-gray-500= req.requestor_name
-            %p.text-lg.text-gray-600= req.phone
+            %p.text-lg.text-gray-500
+              Requested by
+              = req.user.name
+              = "(#{req.user.mobile_number})"
           .flex.flex-col.items-end.gap-1
             - if req.denied?
               %p.text-2xl.font-bold.text-red-600 DENIED

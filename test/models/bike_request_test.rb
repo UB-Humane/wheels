@@ -3,8 +3,6 @@ require "test_helper"
 class BikeRequestTest < ActiveSupport::TestCase
   def valid_bike_request
     br = BikeRequest.new(
-      phone: "5555550000",
-      requestor_name: "Test Person",
       due_date: Date.today + 7,
       distribution: distributions(:downtown_dist),
       production: productions(:main_production),
@@ -16,33 +14,6 @@ class BikeRequestTest < ActiveSupport::TestCase
 
   test "valid bike request saves" do
     assert valid_bike_request.valid?
-  end
-
-  test "phone is required" do
-    br = valid_bike_request
-    br.phone = nil
-    assert_not br.valid?
-    assert_includes br.errors[:phone], "can't be blank"
-  end
-
-  test "phone must be exactly 10 digits" do
-    br = valid_bike_request
-    br.phone = "555-555-0000"
-    assert_not br.valid?
-    assert_includes br.errors[:phone], "must be exactly 10 digits"
-  end
-
-  test "phone with fewer than 10 digits is invalid" do
-    br = valid_bike_request
-    br.phone = "123456789"
-    assert_not br.valid?
-  end
-
-  test "requestor_name is required" do
-    br = valid_bike_request
-    br.requestor_name = nil
-    assert_not br.valid?
-    assert_includes br.errors[:requestor_name], "can't be blank"
   end
 
   test "due_date is required" do

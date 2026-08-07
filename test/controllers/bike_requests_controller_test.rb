@@ -83,7 +83,7 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { email: users(:dist_user).email, password: "password" }
     assert_no_difference "BikeRequest.count" do
       post distribution_bike_requests_path(distributions(:downtown_dist)),
-           params: { bike_request: { phone: "", requestor_name: "", due_date: "" } }
+           params: { bike_request: { due_date: "" } }
     end
     assert_response :unprocessable_entity
   end
@@ -548,7 +548,7 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { email: users(:dist_user).email, password: "password" }
     patch bike_request_path(bike_requests(:denied_bike)),
           params: { bike_request: resubmit_params }
-    assert_equal "Updated Name", bike_requests(:denied_bike).reload.requestor_name
+    assert_equal (Date.today + 14), bike_requests(:denied_bike).reload.due_date
   end
 
   test "resubmit redirects to distribution requested tab" do
@@ -579,8 +579,6 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
 
   def valid_bike_request_params
     {
-      phone: "5555550001",
-      requestor_name: "New Person",
       due_date: (Date.today + 14).to_s,
       bikes_attributes: { "0" => { bike_type: "male" } }
     }
@@ -588,8 +586,6 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
 
   def valid_bike_request_params_with_two_bikes
     {
-      phone: "5555550002",
-      requestor_name: "Two Bikes",
       due_date: (Date.today + 14).to_s,
       bikes_attributes: {
         "0" => { bike_type: "male", name: "Alice" },
@@ -600,8 +596,6 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
 
   def resubmit_params
     {
-      phone: "5555550099",
-      requestor_name: "Updated Name",
       due_date: (Date.today + 14).to_s,
       bikes_attributes: {}
     }

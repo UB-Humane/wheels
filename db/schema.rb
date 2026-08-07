@@ -10,25 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_05_163949) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_07_175326) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
 
   create_table "bike_requests", force: :cascade do |t|
+    t.string "codename", null: false
     t.datetime "created_at", null: false
     t.string "denial_reason"
     t.bigint "distribution_id"
     t.date "due_date", null: false
     t.bigint "owner_id"
-    t.string "phone", null: false
     t.bigint "production_id", null: false
-    t.string "requestor_name", null: false
     t.integer "status", default: 1, null: false
     t.integer "status_before_archival"
     t.bigint "taker_id"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["codename"], name: "index_bike_requests_on_codename"
     t.index ["distribution_id"], name: "index_bike_requests_on_distribution_id"
     t.index ["owner_id"], name: "index_bike_requests_on_owner_id"
     t.index ["production_id"], name: "index_bike_requests_on_production_id"
