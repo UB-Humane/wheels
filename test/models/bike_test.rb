@@ -17,10 +17,9 @@ class BikeTest < ActiveSupport::TestCase
     assert bikes(:requested_bike_bike).male?
   end
 
-  test "age is required when bike_type is kid" do
+  test "age is not required for kid bike_type" do
     bike = Bike.new(bike_request: bike_requests(:requested_bike), bike_type: :kid, age: nil)
-    assert_not bike.valid?
-    assert_includes bike.errors[:age], "can't be blank"
+    assert bike.valid?
   end
 
   test "age is not required for non-kid types" do
@@ -46,5 +45,4 @@ class BikeTest < ActiveSupport::TestCase
     bike = bikes(:requested_bike_bike)
     assert_equal bike_requests(:requested_bike), bike.bike_request
   end
-
 end

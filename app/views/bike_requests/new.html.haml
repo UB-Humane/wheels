@@ -34,8 +34,7 @@
 
     %div{data: { controller: "bike-form",
                  "bike-form-max-bikes-value": BikeRequest::MAX_BIKES,
-                 "bike-form-row-index-value": 1,
-                 "bike-form-validate-age-value": true }}
+                 "bike-form-row-index-value": 1 }}
       .space-y-2.mb-4
         %label.block.text-xl.font-medium.text-gray-900
           How many bikes?
@@ -72,12 +71,12 @@
   %td.px-3.py-2
     %input.w-full.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "text", name: "bike_request[bikes_attributes][NEW_INDEX][name]", placeholder: "optional"}
   %td.px-3.py-2
-    %select.px-2.py-1.text-lg.border-2.border-gray-400.bg-white{name: "bike_request[bikes_attributes][NEW_INDEX][bike_type]", data: { action: "change->bike-form#validateAgeField" }}
+    %select.px-2.py-1.text-lg.border-2.border-gray-400.bg-white{name: "bike_request[bikes_attributes][NEW_INDEX][bike_type]"}
       %option{value: "male"} Male
       %option{value: "female"} Female
       %option{value: "kid"} Kid
   %td.px-3.py-2
-    %input.w-20.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "number", name: "bike_request[bikes_attributes][NEW_INDEX][age]", min: "1", max: "18", data: { action: "input->bike-form#validateAgeField" }}
+    %input.w-20.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "number", name: "bike_request[bikes_attributes][NEW_INDEX][age]"}
   %td.px-3.py-2
     %input.w-28.px-2.py-1.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{type: "text", name: "bike_request[bikes_attributes][NEW_INDEX][height]", placeholder: "5'4\""}
   %td.px-3.py-2

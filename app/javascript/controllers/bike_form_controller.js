@@ -4,11 +4,9 @@ const MIN_BIKES = 1
 
 export default class extends Controller {
   static targets = ["tbody", "countInput"]
-  static values  = { maxBikes: Number, rowIndex: Number, validateAge: Boolean }
+  static values  = { maxBikes: Number, rowIndex: Number }
 
   connect() {
-    if (this.validateAgeValue)
-      this.tbodyTarget.querySelectorAll("tr").forEach(r => this._checkAge(r))
     this._syncCountInput()
   }
 
@@ -30,10 +28,6 @@ export default class extends Controller {
     if (this._countActive() <= MIN_BIKES) return
     this._destroyRow(event.target.closest("tr"))
     this._syncCountInput()
-  }
-
-  validateAgeField(event) {
-    this._checkAge(event.target.closest("tr"))
   }
 
   _addRow() {
@@ -58,17 +52,6 @@ export default class extends Controller {
     } else {
       row.remove()
     }
-  }
-
-  _checkAge(row) {
-    const sel = row.querySelector("select[name*='[bike_type]']")
-    const age = row.querySelector("input[name*='[age]']")
-    if (!sel || !age) return
-    const isKid = sel.value === "kid"
-    const num = parseInt(age.value)
-    const invalid = isKid && (age.value === "" || num < 1 || num > 18)
-    age.classList.toggle("border-red-600", invalid)
-    age.classList.toggle("border-gray-400", !invalid)
   }
 
   _countActive() {
