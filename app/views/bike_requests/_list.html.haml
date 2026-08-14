@@ -26,6 +26,7 @@
               %p.text-lg.text-gray-500
                 Owned by
                 = req.owner.name
+                = "(#{req.owner.mobile_number})"
             - if req.taker.present?
               %p.text-lg.text-gray-500
                 Picked up by
