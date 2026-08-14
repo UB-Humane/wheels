@@ -1,17 +1,16 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { bikes: Array, requestor: String, source: String, codename: String, phone: String, due: String }
+  static values = { bikes: Array, requestor: String, source: String, codename: String, phone: String, owner: String, due: String }
 
   printLabels() {
-    const bikes = this.bikesValue, requestor = this.requestorValue, source = this.sourceValue, codename = this.codenameValue, phone = this.phoneValue
+    const bikes = this.bikesValue, source = this.sourceValue, codename = this.codenameValue
     var pages = []
     bikes.forEach(function(b, i) {
       var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4]
       var lines = []
       lines.push('<p style="font-size:13pt;font-weight:bold;margin:0 0 4px">' + codename + ' &middot; ' + (i + 1) + '/' + bikes.length + '</p>')
       lines.push('<p style="font-size:12pt;font-weight:bold;margin:0">' + source + '</p>')
-      lines.push('<p style="font-size:11pt;color:#555;margin:2px 0">Requested By ' + requestor + ' (' + phone + ')</p>')
       if (name) lines.push('<p style="font-size:18pt;font-weight:bold;margin:8px 0 0">' + name + '</p>')
       var detail = type
       if (age) detail += ' &middot; Age ' + age
@@ -26,7 +25,7 @@ export default class extends Controller {
   }
 
   printCard() {
-    const bikes = this.bikesValue, requestor = this.requestorValue, source = this.sourceValue, codename = this.codenameValue, phone = this.phoneValue, due = this.dueValue
+    const bikes = this.bikesValue, requestor = this.requestorValue, source = this.sourceValue, codename = this.codenameValue, phone = this.phoneValue, owner = this.ownerValue, due = this.dueValue
     var rows = ''
     bikes.forEach(function(b, i) {
       var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4]
@@ -44,6 +43,7 @@ export default class extends Controller {
         '<div style="font-size:20pt;font-weight:bold">' + source + '</div>' +
         '<div style="font-size:14pt;font-weight:bold;margin-top:2px">' + codename + '</div>' +
         '<div style="font-size:14pt;margin-top:2px">Requested By ' + requestor + ' (' + phone + ')</div>' +
+        (owner ? '<div style="font-size:14pt;margin-top:2px">Owned By ' + owner + '</div>' : '') +
         '<div style="font-size:13pt;color:#555;margin-top:3px">Due ' + due + '</div>' +
       '</div>' +
       '<table style="width:100%;border-collapse:collapse">' + rows + '</table>'
