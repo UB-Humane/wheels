@@ -18,6 +18,12 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "edit renders an add-to-home-screen button" do
+    login_as(users(:prod_admin))
+    get edit_profile_path
+    assert_select "button[data-controller='install']"
+  end
+
   # --- update ---
 
   test "update requires authentication" do

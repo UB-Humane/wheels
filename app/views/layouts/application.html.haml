@@ -64,6 +64,12 @@
             .border-t.border-gray-900
               = link_to current_user.name, edit_profile_path, class: "block px-4 py-3 text-lg font-medium text-gray-700 hover:bg-gray-100 whitespace-nowrap"
               = button_to "Log out", logout_path, method: :delete, class: "block w-full text-left px-4 py-3 text-lg font-medium text-gray-900 hover:bg-gray-100 bg-transparent border-0 cursor-pointer"
+    .hidden{id: "install-banner", data: { controller: "install", "install-target": "banner" }}
+      .flex.flex-col.sm:flex-row.sm:items-center.sm:justify-between.gap-3.px-6.py-4.border-b-2.border-gray-900
+        %p.text-lg.font-medium.text-gray-900 Install Wheels on your home screen for quicker access.
+        .flex.gap-3.sm:shrink-0
+          %button{type: "button", class: "w-full sm:w-auto text-center px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0", data: { action: "click->install#install" }} Install
+          %button{type: "button", class: "w-full sm:w-auto text-center px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer", data: { action: "click->install#dismiss" }} Not now
     - if flash[:notice]
       .px-6.py-3.bg-green-100.border-b.border-green-300.text-green-900.text-lg= flash[:notice]
     - if flash[:alert]

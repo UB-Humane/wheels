@@ -60,4 +60,10 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match admin_root_path, response.body
   end
+
+  test "renders the install-to-home-screen banner" do
+    post login_path, params: { email: users(:superadmin).email, password: "password" }
+    get root_path
+    assert_select "#install-banner"
+  end
 end

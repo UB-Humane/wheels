@@ -41,8 +41,13 @@
 
 .max-w-lg.mt-10.pt-8.border-t-2.border-gray-200
   %h2.text-2xl.font-bold.text-gray-900.mb-4 Notifications
-  %button.px-6.py-3.text-lg.font-bold.text-white.bg-gray-900.hover:bg-gray-700.cursor-pointer.transition-colors{
-    type: "button",
-    data: { controller: "push", "push-target": "button", action: "click->push#toggle",
-            "push-vapid-public-key-value": ENV["VAPID_PUBLIC_KEY"] }
-  } Turn on notifications
+  .flex.flex-wrap.gap-3
+    %button.px-6.py-3.text-lg.font-bold.text-white.bg-gray-900.hover:bg-gray-700.cursor-pointer.transition-colors{
+      type: "button",
+      data: { controller: "push", "push-target": "button", action: "click->push#toggle",
+              "push-vapid-public-key-value": ENV["VAPID_PUBLIC_KEY"] }
+    } Turn on notifications
+    %button.px-6.py-3.text-lg.font-bold.text-white.bg-gray-900.hover:bg-gray-700.cursor-pointer.transition-colors{
+      type: "button",
+      data: { controller: "install", "install-target": "button", action: "click->install#install" }
+    } Add to home screen

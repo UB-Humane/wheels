@@ -6,6 +6,15 @@
 - `public/icon.svg` / `public/icon.png` — the app icon (blue wheel/spokes). `icon.png` (512×512) backs `apple-touch-icon`, since iOS Safari's home-screen icon support for SVG is inconsistent; `icon.svg` is the manifest's primary icon.
 - `public/sw.js` — a plain top-level script, registered inline in the layout (`if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js")`). It can't live under `app/javascript/` or go through importmap — service workers are fetched as same-origin static scripts, not ES modules pulled through the import map. Scope is deliberately narrow: no offline caching or `fetch` interception (not needed here), just `install`/`activate` (`skipWaiting`/`clients.claim` so updates apply immediately) and the push-handling events below.
 
+### Install prompt
+
+The browser's own install affordance is easy to miss, so `app/javascript/controllers/install_controller.js` proactively surfaces it in two places that share the same controller via optional targets (`banner`, `button`):
+
+- A dismissible banner (`#install-banner` in `app/views/layouts/application.html.haml`, right after the nav, shown on every page regardless of login state) with "Install" / "Not now" buttons.
+- A persistent "Add to home screen" button on `/profile/edit`, next to "Turn on notifications" — always reflects live state, no dismissal memory, same philosophy as the push toggle.
+
+Mechanics: the browser fires `beforeinstallprompt` when it decides the page is installable (Chrome/Edge/Android/Samsung Internet only — Firefox and iOS Safari never fire it, so there the banner just never appears and the profile button reports "not supported by this browser", no special-casing needed beyond that). The handler calls `event.preventDefault()` and stashes the event; `install()` (bound to both the banner's and the profile page's button) later calls `deferredPrompt.prompt()` from that click's user gesture — required, since `prompt()` only works in direct response to user interaction. Banner dismissal ("Not now", accepting/declining the native dialog, or the `appinstalled` event) is permanent via a `localStorage` key (`wheels:installPromptDismissed`) so the banner doesn't nag; the profile button is unaffected by that flag and always shows the browser's current install state on `connect()` (`window.matchMedia("(display-mode: standalone)")`/`navigator.standalone` for "already installed").
+
 ## Push subscriptions
 
 `PushSubscription` (`app/models/push_subscription.rb`) — `belongs_to :user`, `endpoint`/`p256dh`/`auth` (all required, `endpoint` unique). `User has_many :push_subscriptions, dependent: :destroy` — a user can have several (one per device/browser they've enabled notifications on).
