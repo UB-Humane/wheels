@@ -8,19 +8,28 @@ export default class extends Controller {
     var pages = []
     bikes.forEach(function(b, i) {
       var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4]
-      var lines = []
-      lines.push('<p style="font-size:13pt;font-weight:bold;margin:0 0 4px">' + codename + ' &middot; ' + (i + 1) + '/' + bikes.length + '</p>')
-      lines.push('<p style="font-size:12pt;font-weight:bold;margin:0">' + source + '</p>')
-      if (name) lines.push('<p style="font-size:18pt;font-weight:bold;margin:8px 0 0">' + name + '</p>')
-      var detail = type
-      if (age) detail += ' &middot; Age ' + age
-      if (height) detail += ' &middot; ' + height
-      lines.push('<p style="font-size:14pt;margin:4px 0">' + detail + '</p>')
-      if (notes) lines.push('<p style="font-size:12pt;margin:4px 0">' + notes + '</p>')
-      pages.push('<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') + 'padding:12px">' + lines.join('') + '</div>')
+      var rows = []
+      rows.push('<div style="font-size:9pt;font-weight:bold;margin-bottom:2mm">' + source + '</div>')
+      rows.push('<div style="font-size:8pt;margin:0.5mm 0">Name: ' + (name || '-') + '</div>')
+      rows.push('<div style="font-size:8pt;margin:0.5mm 0">Sex: ' + (type || '-') + '</div>')
+      rows.push('<div style="font-size:8pt;margin:0.5mm 0">Age: ' + (age || '-') + '</div>')
+      rows.push('<div style="font-size:8pt;margin:0.5mm 0">Height: ' + (height || '-') + '</div>')
+      rows.push('<div style="font-size:8pt;margin:0.5mm 0">Notes: ' + (notes || '-') + '</div>')
+      var footer =
+        '<div style="text-align:center">' +
+          '<div style="font-size:20pt;font-weight:bold;line-height:1.1">' + codename + '</div>' +
+          '<div style="font-size:11pt;margin-top:1mm">' + (i + 1) + '/' + bikes.length + '</div>' +
+        '</div>'
+      pages.push(
+        '<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') +
+          'width:50mm;height:80mm;box-sizing:border-box;padding:3mm 3mm 6mm;display:flex;flex-direction:column;justify-content:space-between">' +
+          '<div>' + rows.join('') + '</div>' +
+          footer +
+        '</div>'
+      )
     })
     var win = window.open('', '_blank', 'width=400,height=600')
-    win.document.write('<html><body style="font-family:sans-serif;margin:0">' + pages.join('') + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
+    win.document.write('<html><head><style>@page { size: 50mm 80mm; margin: 0; }</style></head><body style="font-family:sans-serif;margin:0">' + pages.join('') + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
     win.document.close()
   }
 
