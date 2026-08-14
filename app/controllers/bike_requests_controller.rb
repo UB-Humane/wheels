@@ -28,6 +28,7 @@ class BikeRequestsController < ApplicationController
     @bike_request.user = current_user
 
     if @bike_request.save
+      notify_new_request if @distribution
       redirect_to(@distribution ? tickets_distribution_path(@distribution) : tickets_production_path(@bike_request.production),
                   notice: "Bike request submitted.")
     else
@@ -41,7 +42,10 @@ class BikeRequestsController < ApplicationController
 
   def complete_all
     return render plain: "Access denied", status: :forbidden unless production_master_mechanic?(@bike_request.production)
-    @bike_request.update_columns(status: BikeRequest.statuses[:ready_for_delivery]) if @bike_request.pending?
+    if @bike_request.pending?
+      @bike_request.update_columns(status: BikeRequest.statuses[:ready_for_delivery])
+      notify_status_change("ready_for_delivery")
+    end
     redirect_to delivery_production_path(@bike_request.production, tab: "ready_for_delivery")
   end
 
@@ -94,6 +98,7 @@ class BikeRequestsController < ApplicationController
     end
 
     if attributes && @bike_request.update(attributes)
+      notify_status_change(params[:status])
       tab = case params[:status]
             when "approve"   then "pending"
             when "deny"      then "requested"
@@ -113,6 +118,30 @@ class BikeRequestsController < ApplicationController
       delivery_production_path(production, tab: tab)
     else
       tickets_production_path(production, tab: tab)
+    end
+  end
+
+  def notify_new_request
+    recipients = UserProduction.where(production: @bike_request.production, role: %w[admin master_mechanic]).includes(:user).map(&:user)
+    PushNotifier.notify(users: recipients, title: "New bike request",
+      body: "#{@bike_request.codename} needs approval.")
+  end
+
+  def notify_status_change(status)
+    case status
+    when "approve"
+      PushNotifier.notify(users: [ @bike_request.user ], title: "Request approved",
+        body: "#{@bike_request.codename} was approved.")
+    when "deny"
+      reason = @bike_request.denial_reason.presence
+      body = reason ? "#{@bike_request.codename} was denied: #{reason}" : "#{@bike_request.codename} was denied."
+      PushNotifier.notify(users: [ @bike_request.user ], title: "Request denied", body: body)
+    when "ready_for_delivery"
+      PushNotifier.notify(users: [ @bike_request.user ], title: "Bikes ready for delivery",
+        body: "#{@bike_request.codename} is ready for delivery.")
+    when "delivered"
+      PushNotifier.notify(users: [ @bike_request.user ], title: "Delivered",
+        body: "#{@bike_request.codename} was delivered.")
     end
   end
 

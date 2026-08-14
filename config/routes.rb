@@ -15,6 +15,7 @@ Rails.application.routes.draw do
 
   resource :profile, only: [ :edit, :update ]
   resource :mobile_number, only: [ :edit, :update ]
+  resource :push_subscription, only: [ :create, :destroy ]
 
   namespace :admin do
     root to: "dashboard#index"

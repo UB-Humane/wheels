@@ -19,6 +19,8 @@
           memcached
 
           libyaml
+          openssl
+          pkg-config
 
           (pkgs.writeShellScriptBin "pg-stop" ''
             pg_ctl -D $PGDATA -U postgres stop

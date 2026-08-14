@@ -57,6 +57,14 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert BikeRequest.last.requested?
   end
 
+  test "create notifies production admins/master mechanics" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    assert_enqueued_jobs 1, only: SendPushNotificationJob do
+      post distribution_bike_requests_path(distributions(:downtown_dist)),
+           params: { bike_request: valid_bike_request_params }
+    end
+  end
+
   test "create saves nested bikes" do
     post login_path, params: { email: users(:dist_user).email, password: "password" }
     assert_difference "Bike.count", 2 do
@@ -110,6 +118,14 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
   test "create production request saves record" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     assert_difference "BikeRequest.count", 1 do
+      post production_bike_requests_path(productions(:main_production)),
+           params: { bike_request: valid_bike_request_params }
+    end
+  end
+
+  test "create production request sends no notification" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    assert_no_enqueued_jobs only: SendPushNotificationJob do
       post production_bike_requests_path(productions(:main_production)),
            params: { bike_request: valid_bike_request_params }
     end
@@ -264,6 +280,13 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert bike_requests(:requested_bike).reload.pending?
   end
 
+  test "update approve notifies the submitter" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    assert_enqueued_jobs 1, only: SendPushNotificationJob do
+      patch bike_request_path(bike_requests(:requested_bike)), params: { status: "approve" }
+    end
+  end
+
   test "update approve saves owner when owner is a master mechanic" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch bike_request_path(bike_requests(:requested_bike)),
@@ -298,6 +321,13 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch bike_request_path(bike_requests(:requested_bike)), params: { status: "deny" }
     assert bike_requests(:requested_bike).reload.denied?
+  end
+
+  test "update deny notifies the submitter" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    assert_enqueued_jobs 1, only: SendPushNotificationJob do
+      patch bike_request_path(bike_requests(:requested_bike)), params: { status: "deny" }
+    end
   end
 
   test "update deny redirects to production requested tab" do
@@ -344,6 +374,13 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert bike_requests(:completed_bike).reload.delivered?
   end
 
+  test "update delivered notifies the submitter" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    assert_enqueued_jobs 1, only: SendPushNotificationJob do
+      patch bike_request_path(bike_requests(:completed_bike)), params: { status: "delivered" }
+    end
+  end
+
   test "update delivered from ready_for_delivery returns 403 for a plain volunteer" do
     post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
     patch bike_request_path(bike_requests(:completed_bike)), params: { status: "delivered" }
@@ -376,6 +413,13 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch bike_request_path(bike_requests(:completed_bike)), params: { status: "taken_up" }
     assert bike_requests(:completed_bike).reload.taken_up?
+  end
+
+  test "update taken_up sends no notification" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    assert_no_enqueued_jobs only: SendPushNotificationJob do
+      patch bike_request_path(bike_requests(:completed_bike)), params: { status: "taken_up" }
+    end
   end
 
   test "update taken_up records the taker" do
@@ -561,6 +605,13 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
     patch complete_all_bike_request_path(bike_requests(:pending_bike))
     assert bike_requests(:pending_bike).reload.ready_for_delivery?
+  end
+
+  test "complete_all notifies the submitter" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    assert_enqueued_jobs 1, only: SendPushNotificationJob do
+      patch complete_all_bike_request_path(bike_requests(:pending_bike))
+    end
   end
 
   test "complete_all redirects to delivery ready_for_delivery tab" do

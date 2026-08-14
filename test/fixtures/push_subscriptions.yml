@@ -1,0 +1,11 @@
+prod_admin_subscription:
+  user: prod_admin
+  endpoint: https://push.example.com/subscriptions/prod-admin
+  p256dh: prod-admin-p256dh-key
+  auth: prod-admin-auth-key
+
+dist_user_subscription:
+  user: dist_user
+  endpoint: https://push.example.com/subscriptions/dist-user
+  p256dh: dist-user-p256dh-key
+  auth: dist-user-auth-key

@@ -5,6 +5,7 @@ class User < ApplicationRecord
   has_many :productions, through: :user_productions
   has_many :user_distributions, dependent: :destroy
   has_many :distributions, through: :user_distributions
+  has_many :push_subscriptions, dependent: :destroy
 
   MOBILE_NUMBER_FORMAT = /\A\d{10}\z/
 

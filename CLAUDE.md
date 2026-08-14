@@ -16,7 +16,7 @@ Each bike request belongs to its `requestor` (the submitting user) — no separa
 
 Status flow: **requested → pending → ready_for_delivery → taken_up → delivered → distributed**, with `denied` (from `requested`) and `archived` (from most other statuses) as side states. Back-transitions are allowed at each step. Marking pending sets the claiming production worker as the assignee.
 
-Each card will eventually have a print button (not yet implemented — keep the card layout print-friendly).
+Each card has print buttons (per-bike labels and a single-page overview) — see `docs/architecture/views.md`.
 
 ### Future considerations
 
@@ -29,6 +29,7 @@ Each card will eventually have a print button (not yet implemented — keep the 
 - Locations & bike requests: `docs/architecture/locations.md`
 - Admin panel: `docs/architecture/admin.md`
 - Views, design system, partials: `docs/architecture/views.md`
+- PWA & push notifications: `docs/architecture/notifications.md`
 - UI design rules: `DESIGN.md`
 - Commit policy: see Commits section below
 - Testing policy: see Testing section below

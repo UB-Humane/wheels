@@ -38,3 +38,11 @@
   .flex.gap-4
     = f.submit "Save Changes", class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"
     = link_to "Cancel", root_path, class: "px-6 py-3 text-lg font-medium text-gray-900 underline"
+
+.max-w-lg.mt-10.pt-8.border-t-2.border-gray-200
+  %h2.text-2xl.font-bold.text-gray-900.mb-4 Notifications
+  %button.px-6.py-3.text-lg.font-bold.text-white.bg-gray-900.hover:bg-gray-700.cursor-pointer.transition-colors{
+    type: "button",
+    data: { controller: "push", "push-target": "button", action: "click->push#toggle",
+            "push-vapid-public-key-value": ENV["VAPID_PUBLIC_KEY"] }
+  } Turn on notifications
