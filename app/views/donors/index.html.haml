@@ -9,11 +9,11 @@
       = link_to "Add", new_production_donor_path(@production), class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 transition-colors"
       = link_to "Archived", production_donors_path(@production, archived: true), class: "px-4 py-2 text-lg font-medium text-gray-900 underline"
 
-= form_with url: production_donors_path(@production), method: :get, class: "flex gap-3 mb-6" do |f|
+= form_with url: production_donors_path(@production), method: :get, class: "flex flex-wrap gap-3 mb-6" do |f|
   - if @showing_archived
     %input{type: "hidden", name: "archived", value: "true"}
   = f.text_field :query, value: @query, placeholder: "Search by name or email",
-      class: "flex-1 px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+      class: "flex-1 min-w-0 px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
   = f.submit "Search", class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"
   - if @query
     = link_to "Clear", production_donors_path(@production, archived: @showing_archived || nil), class: "px-4 py-3 text-lg font-medium text-gray-900 underline self-center"
@@ -21,7 +21,7 @@
 - if @donors.any?
   .space-y-2
     - @donors.each do |donor|
-      .flex.items-start.justify-between.px-6.py-5.border-2.border-gray-900
+      .flex.flex-col.sm:flex-row.sm:items-start.sm:justify-between.gap-3.px-6.py-5.border-2.border-gray-900
         .space-y-1
           %p.text-2xl.font-bold.text-gray-900= donor.full_name
           - if donor.email.present?
@@ -30,7 +30,7 @@
             %p.text-lg.text-gray-500= donor.mobile
           - if donor.address.present?
             %p.text-lg.text-gray-600= donor.address
-        .flex.items-center.gap-4.shrink-0
+        .flex.flex-wrap.items-center.gap-4.sm:shrink-0
           = link_to "Edit", edit_production_donor_path(@production, donor), class: "px-4 py-2 text-lg font-medium text-gray-900 underline"
           - if @showing_archived
             = button_to "Unarchive", production_donor_path(@production, donor), method: :patch,

@@ -1,6 +1,6 @@
-.flex.border-b-2.border-gray-900.mb-8
+.flex.overflow-x-auto.border-b-2.border-gray-900.mb-8
   - tabs.each do |tab|
-    = link_to url_for(tab: tab), class: "px-6 py-3 text-lg font-medium #{active_tab == tab ? 'font-bold border-b-4 border-gray-900 -mb-0.5' : 'text-gray-500'}" do
+    = link_to url_for(tab: tab), class: "px-6 py-3 text-lg font-medium whitespace-nowrap #{active_tab == tab ? 'font-bold border-b-4 border-gray-900 -mb-0.5' : 'text-gray-500'}" do
       = tab.titleize
       %span.ml-1= "(#{tab_counts[tab] || 0})"
 
@@ -19,9 +19,9 @@
                 "print-phone-value":     req.user.mobile_number,
                 "print-owner-value":     req.owner.present? ? "#{req.owner.name} (#{req.owner.mobile_number})" : "",
                 "print-due-value":       req.due_date.strftime("%-m/%-d/%Y") }}
-        .flex.items-start.justify-between.gap-4
+        .flex.flex-col.sm:flex-row.sm:items-start.sm:justify-between.gap-3.sm:gap-4
           .space-y-1
-            .flex.items-baseline.gap-2
+            .flex.flex-wrap.items-baseline.gap-2
               %p.text-2xl.font-bold.text-gray-900= req.distribution&.name || "Production Request"
               %p.text-lg.text-gray-500= req.codename
             - if req.owner.present?
@@ -37,12 +37,12 @@
               Requested by
               = req.user.name
               = "(#{req.user.mobile_number})"
-          .flex.flex-col.items-end.gap-1
+          .flex.flex-col.items-start.sm:items-end.gap-1
             - if req.denied?
               %p.text-2xl.font-bold.text-red-600 DENIED
               - if req.denial_reason.present?
                 %p.text-lg.text-red-600= req.denial_reason
-            .flex.items-center.gap-4
+            .flex.flex-wrap.items-center.gap-4
               - if req.overdue?
                 %p.text-lg.font-bold.text-red-600 OVERDUE
               %p.text-lg.font-medium.text-gray-900 Due #{req.due_date.strftime("%-m/%-d/%Y")}
@@ -76,15 +76,19 @@
                     %td.px-3.py-2.text-lg.text-gray-900= bike.notes.presence || "—"
 
 
-        .flex.gap-4.mt-2
+        - primary_btn = "w-full sm:w-auto text-center px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
+        - destructive_btn = "w-full sm:w-auto text-center px-6 py-3 text-lg font-bold text-white bg-red-700 hover:bg-red-600 cursor-pointer transition-colors border-0"
+        - secondary_btn = "w-full sm:w-auto text-center px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
+        - form_width = { class: "w-full sm:w-auto sm:shrink-0" }
+        .flex.flex-col.items-stretch.sm:flex-row.sm:flex-wrap.sm:items-center.gap-3.mt-2
           - if production_view
             - if req.requested?
               - owner_search_data = { controller: "owner-search", action: "click@window->owner-search#closeDropdown", "owner-search-production-id-value" => req.production.id }
-              = form_with url: bike_request_path(req), method: :patch, class: "flex items-center gap-3", data: owner_search_data do |f|
+              = form_with url: bike_request_path(req), method: :patch, class: "flex flex-wrap items-center gap-3 w-full sm:w-auto sm:shrink-0", data: owner_search_data do |f|
                 = hidden_field_tag :status, "approve"
                 = hidden_field_tag :owner_id, "", data: { "owner-search-target": "hidden" }
-                .relative
-                  %input.px-3.py-2.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{
+                .relative.w-full.sm:w-56
+                  %input.w-full.px-3.py-2.text-lg.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{
                     type: "text", autocomplete: "off",
                     placeholder: "Assign to...",
                     data: { "owner-search-target": "input", action: "input->owner-search#search" }
@@ -94,51 +98,51 @@
                     data: { "owner-search-target": "dropdown" }
                   }
                 = submit_tag "Approve", disabled: true,
-                    class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 transition-colors border-0 opacity-50 cursor-not-allowed",
+                    class: "#{primary_btn} opacity-50 cursor-not-allowed",
                     data: { "owner-search-target": "button" }
-              = form_with url: bike_request_path(req), method: :patch, class: "flex gap-2 items-center" do |f|
+              = form_with url: bike_request_path(req), method: :patch, class: "flex flex-wrap items-center gap-3 w-full sm:w-auto sm:shrink-0" do |f|
                 = hidden_field_tag :status, "deny"
-                = text_field_tag :denial_reason, nil, placeholder: "Reason (optional)", class: "px-3 py-2 text-lg border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
-                = submit_tag "Deny", class: "px-6 py-3 text-lg font-bold text-white bg-red-700 hover:bg-red-600 cursor-pointer transition-colors border-0"
+                = text_field_tag :denial_reason, nil, placeholder: "Reason (optional)", class: "w-full sm:w-56 px-3 py-2 text-lg border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+                = submit_tag "Deny", class: destructive_btn
             - elsif req.pending?
               - if can_correct_status
-                = button_to "Ready for Delivery", complete_all_bike_request_path(req), method: :patch,
-                    class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
+                = button_to "Ready for Delivery", complete_all_bike_request_path(req), method: :patch, form: form_width,
+                    class: primary_btn
               - if can_correct_status
-                = button_to "Back to Requested", bike_request_path(req), method: :patch, params: { status: "back_to_requested" },
-                    class: "px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
+                = button_to "Back to Requested", bike_request_path(req), method: :patch, params: { status: "back_to_requested" }, form: form_width,
+                    class: secondary_btn
             - elsif req.ready_for_delivery?
-              = button_to "I've got this", bike_request_path(req), method: :patch, params: { status: "taken_up" },
-                  class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
+              = button_to "I've got this", bike_request_path(req), method: :patch, params: { status: "taken_up" }, form: form_width,
+                  class: primary_btn
               - if can_correct_status
-                = button_to "Back to Pending", bike_request_path(req), method: :patch, params: { status: "back_to_pending" },
-                    class: "px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
+                = button_to "Back to Pending", bike_request_path(req), method: :patch, params: { status: "back_to_pending" }, form: form_width,
+                    class: secondary_btn
             - elsif req.taken_up?
               - if can_complete_delivery
-                = button_to "I'm done!", bike_request_path(req), method: :patch, params: { status: "delivered" },
-                    class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
+                = button_to "I'm done!", bike_request_path(req), method: :patch, params: { status: "delivered" }, form: form_width,
+                    class: primary_btn
               - if can_correct_status
-                = button_to "Back to Ready for Delivery", bike_request_path(req), method: :patch, params: { status: "back_to_ready_for_delivery" },
-                    class: "px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
+                = button_to "Back to Ready for Delivery", bike_request_path(req), method: :patch, params: { status: "back_to_ready_for_delivery" }, form: form_width,
+                    class: secondary_btn
             - elsif req.delivered?
               - if (req.distribution.nil? && requestor_for?(req)) || can_correct_status
-                = button_to "Mark Distributed", bike_request_path(req), method: :patch, params: { status: "distributed" },
-                    class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
+                = button_to "Mark Distributed", bike_request_path(req), method: :patch, params: { status: "distributed" }, form: form_width,
+                    class: primary_btn
               - if can_correct_status
-                = button_to "Back to Taken Up", bike_request_path(req), method: :patch, params: { status: "back_to_taken_up" },
-                    class: "px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
+                = button_to "Back to Taken Up", bike_request_path(req), method: :patch, params: { status: "back_to_taken_up" }, form: form_width,
+                    class: secondary_btn
             - elsif req.archived?
-              = button_to "Unarchive", bike_request_path(req), method: :patch, params: { status: "unarchive" },
-                  class: "px-4 py-2 text-lg font-medium text-gray-900 underline bg-transparent border-0 cursor-pointer"
+              = button_to "Unarchive", bike_request_path(req), method: :patch, params: { status: "unarchive" }, form: form_width,
+                  class: secondary_btn
           - else
             - if req.requested? || req.denied?
-              = link_to "Edit", edit_bike_request_path(req), class: "px-4 py-2 text-lg font-medium text-gray-900 underline"
+              = link_to "Edit", edit_bike_request_path(req), class: secondary_btn
           - if !production_view && req.delivered? && requestor_for?(req)
-            = button_to "Mark Distributed", bike_request_path(req), method: :patch, params: { status: "distributed" },
-                class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors border-0"
+            = button_to "Mark Distributed", bike_request_path(req), method: :patch, params: { status: "distributed" }, form: form_width,
+                class: primary_btn
           - if production_view && !req.requested? && !req.archived?
-            %button.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer.self-center{type: "button", data: { action: "click->print#printLabels" }} Print All
-            %button.text-lg.font-medium.text-gray-900.underline.bg-transparent.border-0.cursor-pointer.self-center{type: "button", data: { action: "click->print#printCard" }} Print Overview
+            %button{type: "button", class: secondary_btn, data: { action: "click->print#printLabels" }} Print All
+            %button{type: "button", class: secondary_btn, data: { action: "click->print#printCard" }} Print Overview
 
   - if pagy.pages > 1
     .flex.items-center.gap-6.mt-8.text-lg

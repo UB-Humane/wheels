@@ -1,11 +1,11 @@
 %section
   %h2.text-2xl.font-bold.text-gray-900.mb-6 Members
 
-  = form_with url: location_path, method: :get, class: "flex gap-3 mb-6" do |f|
+  = form_with url: location_path, method: :get, class: "flex flex-wrap gap-3 mb-6" do |f|
     - params.permit(:tab).each do |key, val|
       %input{type: "hidden", name: key, value: val}
     = f.text_field :member_query, value: params[:member_query], placeholder: "Search by name or email",
-        class: "flex-1 px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+        class: "flex-1 min-w-0 px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
     = f.submit "Search", class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"
 
   - if search_results&.any?
@@ -14,12 +14,12 @@
       - membership_by_user_id = members.index_by(&:user_id)
       - search_results.each do |user|
         - existing = membership_by_user_id[user.id]
-        .flex.items-center.justify-between.px-6.py-4.border-2.border-gray-400
+        .flex.flex-col.sm:flex-row.sm:items-center.sm:justify-between.gap-3.px-6.py-4.border-2.border-gray-400
           .space-y-0.5
             %p.text-xl.font-bold.text-gray-900= user.name
             %p.text-lg.text-gray-500= user.email
           - if existing
-            .flex.items-center.gap-3
+            .flex.flex-wrap.items-center.gap-3
               = form_with url: member_update_path.call(existing), method: :patch, class: "flex items-center gap-2" do |f|
                 = f.select :role, roles.map { |r| [r.titleize, r] }, { selected: existing.role },
                     class: "px-3 py-2 text-lg border-2 border-gray-400 bg-white",
@@ -32,7 +32,7 @@
                   data: { turbo_confirm: "Remove #{user.name}?" },
                   class: "px-4 py-2 text-lg font-medium text-red-700 underline bg-transparent border-0 cursor-pointer"
           - else
-            = form_with url: members_create_path, method: :post, class: "flex items-center gap-3" do |f|
+            = form_with url: members_create_path, method: :post, class: "flex flex-wrap items-center gap-3" do |f|
               = f.hidden_field :user_id, value: user.id
               = f.select :role, roles.map { |r| [r.titleize, r] },
                   {}, class: "px-3 py-2 text-lg border-2 border-gray-400 bg-white"
@@ -45,11 +45,11 @@
       .space-y-2
         %p.text-lg.font-semibold.text-gray-700.mb-2 Current members
         - members.each do |membership|
-          .flex.items-center.justify-between.px-6.py-4.border-2.border-gray-900
+          .flex.flex-col.sm:flex-row.sm:items-center.sm:justify-between.gap-3.px-6.py-4.border-2.border-gray-900
             .space-y-0.5
               %p.text-xl.font-bold.text-gray-900= membership.user.name
               %p.text-lg.text-gray-500= membership.user.email
-            .flex.items-center.gap-3
+            .flex.flex-wrap.items-center.gap-3
               = form_with url: member_update_path.call(membership), method: :patch, class: "flex items-center gap-2" do |f|
                 = f.select :role, roles.map { |r| [r.titleize, r] }, { selected: membership.role },
                     class: "px-3 py-2 text-lg border-2 border-gray-400 bg-white",

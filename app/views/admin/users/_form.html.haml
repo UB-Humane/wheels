@@ -42,7 +42,7 @@
         %legend.text-xl.font-semibold.text-gray-900.mb-3 Production Access
         - productions.each do |production|
           - assigned = user_productions_map[production.id]
-          .flex.items-center.gap-4.py-3.border-b.border-gray-200
+          .flex.flex-wrap.items-center.gap-4.py-3.border-b.border-gray-200
             %input{type: "checkbox", name: "production_access_enabled[#{production.id}]",
                 id: "production_#{production.id}", value: "1", checked: assigned.present?,
                 class: "w-6 h-6 border-2 border-gray-400"}
@@ -57,7 +57,7 @@
         %legend.text-xl.font-semibold.text-gray-900.mb-3 Distribution Access
         - distributions.each do |dist|
           - assigned = user_distributions_map[dist.id]
-          .flex.items-center.gap-4.py-3.border-b.border-gray-200
+          .flex.flex-wrap.items-center.gap-4.py-3.border-b.border-gray-200
             %input{type: "checkbox", name: "distribution_access_enabled[#{dist.id}]",
                 id: "dist_#{dist.id}", value: "1", checked: assigned.present?,
                 class: "w-6 h-6 border-2 border-gray-400"}
