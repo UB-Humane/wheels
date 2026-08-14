@@ -32,6 +32,7 @@ Rails.application.routes.draw do
     get :users,     on: :member
     get :inventory, on: :member
     get :members,   on: :member
+    get :distributions_search, on: :member
     get :delivery,  on: :member
     get :your_tickets, on: :member
     resources :donors,           only: [ :index, :new, :create, :edit, :update ]

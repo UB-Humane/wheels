@@ -43,6 +43,13 @@ class ProductionsController < ApplicationController
     render json: users.map { |u| { id: u.id, name: u.name, email: u.email } }
   end
 
+  def distributions_search
+    return render plain: "Access denied", status: :forbidden unless production_admin?(@production) || production_master_mechanic?(@production)
+    q = "%#{params[:q]}%"
+    distributions = Distribution.where("name ILIKE ?", q).order(:name).limit(10)
+    render json: distributions.map { |d| { id: d.id, name: d.name } }
+  end
+
   def your_tickets
     return render plain: "Access denied", status: :forbidden unless production_ticket_owner_eligible?
     @location_active = :your_tickets

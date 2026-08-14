@@ -283,6 +283,46 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_empty result
   end
 
+  # --- distributions_search action ---
+
+  test "distributions_search requires authentication" do
+    get distributions_search_production_path(productions(:main_production)), params: { q: "Downtown" }
+    assert_redirected_to login_path
+  end
+
+  test "distributions_search returns 403 for a plain volunteer" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
+    get distributions_search_production_path(productions(:main_production)), params: { q: "Downtown" }
+    assert_response :forbidden
+  end
+
+  test "distributions_search returns matching distributions as JSON for an admin" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get distributions_search_production_path(productions(:main_production)), params: { q: "Downtown" }
+    assert_response :success
+    result = JSON.parse(response.body)
+    assert_equal 1, result.length
+    assert_equal distributions(:downtown_dist).id, result.first["id"]
+    assert_equal distributions(:downtown_dist).name, result.first["name"]
+  end
+
+  test "distributions_search returns matching distributions as JSON for a master mechanic" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    get distributions_search_production_path(productions(:main_production)), params: { q: "Uptown" }
+    assert_response :success
+    result = JSON.parse(response.body)
+    assert_equal 1, result.length
+    assert_equal distributions(:uptown_dist).id, result.first["id"]
+  end
+
+  test "distributions_search does not match unrelated names" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get distributions_search_production_path(productions(:main_production)), params: { q: "Nonexistent" }
+    assert_response :success
+    result = JSON.parse(response.body)
+    assert_empty result
+  end
+
   # --- your_tickets action ---
 
   test "your_tickets requires authentication" do

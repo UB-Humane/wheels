@@ -173,6 +173,53 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_nil BikeRequest.last.owner
   end
 
+  # --- new/create: production request on behalf of a distribution ---
+
+  test "create production request with distribution_id creates a distribution request for an admin" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    assert_difference "BikeRequest.count", 1 do
+      post production_bike_requests_path(productions(:main_production)),
+           params: { bike_request: valid_bike_request_params.merge(distribution_id: distributions(:downtown_dist).id) }
+    end
+    br = BikeRequest.last
+    assert_equal distributions(:downtown_dist), br.distribution
+    assert_equal productions(:main_production), br.production
+    assert br.pending?
+    assert_nil br.owner
+  end
+
+  test "create production request with distribution_id creates a distribution request for a master mechanic" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    post production_bike_requests_path(productions(:main_production)),
+         params: { bike_request: valid_bike_request_params.merge(distribution_id: distributions(:downtown_dist).id) }
+    assert_equal distributions(:downtown_dist), BikeRequest.last.distribution
+  end
+
+  test "create production request assigns submitting user as requestor when on behalf of a distribution" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    post production_bike_requests_path(productions(:main_production)),
+         params: { bike_request: valid_bike_request_params.merge(distribution_id: distributions(:downtown_dist).id) }
+    assert_equal users(:prod_admin), BikeRequest.last.user
+  end
+
+  test "create production request honors owner_id when distribution_id is also present" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    post production_bike_requests_path(productions(:main_production)),
+         params: { bike_request: valid_bike_request_params.merge(
+           distribution_id: distributions(:downtown_dist).id, owner_id: users(:master_mechanic_user).id
+         ) }
+    assert_equal users(:master_mechanic_user), BikeRequest.last.owner
+  end
+
+  test "create production request ignores distribution_id for a plain volunteer" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
+    post production_bike_requests_path(productions(:main_production)),
+         params: { bike_request: valid_bike_request_params.merge(distribution_id: distributions(:downtown_dist).id) }
+    br = BikeRequest.last
+    assert_nil br.distribution
+    assert br.pending?
+  end
+
   # --- edit ---
 
   test "edit requires authentication" do

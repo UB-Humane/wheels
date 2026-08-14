@@ -2,7 +2,8 @@
 .max-w-4xl
   %h1.text-3xl.font-bold.text-gray-900.mb-8 Request Bikes
 
-  - owner_search_data = @production_requester ? { controller: "owner-search", action: "click@window->owner-search#closeDropdown", "owner-search-production-id-value" => @production_requester.id } : {}
+  - owner_search_data = @production_requester ? { controller: "owner-search distribution-search", action: "click@window->owner-search#closeDropdown click@window->distribution-search#closeDropdown", "owner-search-production-id-value" => @production_requester.id, "distribution-search-production-id-value" => @production_requester.id } : {}
+  - show_distribution_search = @production_requester && (production_admin?(@production_requester) || production_master_mechanic?(@production_requester))
   = form_with model: (@distribution ? [@distribution, @bike_request] : [@production_requester, @bike_request]), class: "space-y-8", data: owner_search_data do |f|
     - if @bike_request.errors.any?
       .mb-4.space-y-1
@@ -15,6 +16,20 @@
       = f.date_field :due_date, class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
       - @bike_request.errors[:due_date].each do |msg|
         %p.text-lg.text-red-700= msg
+
+    - if show_distribution_search
+      .space-y-2
+        %label.block.text-xl.font-medium.text-gray-900 Request on behalf of a distribution (optional)
+        .relative
+          %input.w-full.px-4.py-3.text-xl.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{
+            type: "text", autocomplete: "off", placeholder: "Search distributions...",
+            data: { "distribution-search-target": "input", action: "input->distribution-search#search" }
+          }
+          %ul.absolute.z-10.bg-white.border-2.border-gray-900.w-full.p-0.m-0{
+            hidden: true, style: "max-height:200px;overflow-y:auto",
+            data: { "distribution-search-target": "dropdown" }
+          }
+        %input{type: "hidden", name: "bike_request[distribution_id]", data: { "distribution-search-target": "hidden" }}
 
     - if @production_requester
       .space-y-2

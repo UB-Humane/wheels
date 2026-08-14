@@ -17,6 +17,10 @@ class BikeRequestsController < ApplicationController
     if @distribution
       @bike_request.distribution = @distribution
       @bike_request.production   = Production.first
+    elsif (distribution = selected_distribution)
+      @bike_request.distribution = distribution
+      @bike_request.production   = Production.first
+      @bike_request.status       = :pending
     else
       @bike_request.production = @production_requester
       @bike_request.status     = :pending
@@ -130,6 +134,12 @@ class BikeRequestsController < ApplicationController
 
   def set_production_requester
     @production_requester = Production.find(params[:production_id])
+  end
+
+  def selected_distribution
+    return nil unless @production_requester.present?
+    return nil unless production_admin?(@production_requester) || production_master_mechanic?(@production_requester)
+    Distribution.find_by(id: params.dig(:bike_request, :distribution_id))
   end
 
   def check_production_access
