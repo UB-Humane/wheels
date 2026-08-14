@@ -342,10 +342,22 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert bike_requests(:completed_bike).reload.delivered?
   end
 
-  test "update distributed returns 403 for non-requestor production user" do
-    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+  test "update distributed returns 403 for a plain volunteer who is not the requestor" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
     patch bike_request_path(bike_requests(:completed_bike)), params: { status: "distributed" }
     assert_response :forbidden
+  end
+
+  test "update distributed allows a production admin even on a distribution-submitted request" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:completed_bike)), params: { status: "distributed" }
+    assert bike_requests(:completed_bike).reload.distributed?
+  end
+
+  test "update distributed redirects a production admin to production tickets, not the distribution's" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(bike_requests(:completed_bike)), params: { status: "distributed" }
+    assert_redirected_to tickets_production_path(productions(:main_production), tab: "distributed")
   end
 
   test "update distributed allows distribution requestor" do
@@ -456,8 +468,16 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert br.reload.delivered?
   end
 
-  test "update delivered from taken_up returns 403 for a production user who is not the taker or master mechanic" do
+  test "update delivered from taken_up allows an admin even if not the taker" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    br = bike_requests(:taken_up_bike)
+    br.update_columns(taker_id: users(:master_mechanic_user).id)
+    patch bike_request_path(br), params: { status: "delivered" }
+    assert br.reload.delivered?
+  end
+
+  test "update delivered from taken_up returns 403 for a plain volunteer who is not the taker, owner, or admin/master mechanic" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
     br = bike_requests(:taken_up_bike)
     br.update_columns(taker_id: users(:master_mechanic_user).id)
     patch bike_request_path(br), params: { status: "delivered" }
@@ -595,10 +615,16 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
-  test "complete_all returns 403 for production admin" do
-    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+  test "complete_all returns 403 for a plain volunteer" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
     patch complete_all_bike_request_path(bike_requests(:pending_bike))
     assert_response :forbidden
+  end
+
+  test "complete_all allows a production admin" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch complete_all_bike_request_path(bike_requests(:pending_bike))
+    assert bike_requests(:pending_bike).reload.ready_for_delivery?
   end
 
   test "complete_all sets request status to ready_for_delivery" do
@@ -611,6 +637,15 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
     assert_enqueued_jobs 1, only: SendPushNotificationJob do
       patch complete_all_bike_request_path(bike_requests(:pending_bike))
+    end
+  end
+
+  test "complete_all also notifies the owner when one is assigned" do
+    post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
+    br = bike_requests(:pending_bike)
+    br.update_columns(owner_id: users(:prod_admin).id)
+    assert_enqueued_jobs 2, only: SendPushNotificationJob do
+      patch complete_all_bike_request_path(br)
     end
   end
 

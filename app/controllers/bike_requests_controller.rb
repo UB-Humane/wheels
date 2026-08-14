@@ -41,7 +41,7 @@ class BikeRequestsController < ApplicationController
   end
 
   def complete_all
-    return render plain: "Access denied", status: :forbidden unless production_master_mechanic?(@bike_request.production)
+    return render plain: "Access denied", status: :forbidden unless authorized_for_status_correction?
     if @bike_request.pending?
       @bike_request.update_columns(status: BikeRequest.statuses[:ready_for_delivery])
       notify_status_change("ready_for_delivery")
@@ -51,9 +51,9 @@ class BikeRequestsController < ApplicationController
 
   def update
     if params[:status] == "distributed"
-      return render plain: "Access denied", status: :forbidden unless requestor_for?(@bike_request)
+      return render plain: "Access denied", status: :forbidden unless requestor_for?(@bike_request) || authorized_for_status_correction?
       @bike_request.update!(status: :distributed)
-      if @bike_request.distribution.present?
+      if @bike_request.distribution.present? && current_user&.distributions&.include?(@bike_request.distribution)
         redirect_to tickets_distribution_path(@bike_request.distribution, tab: "distributed")
       else
         redirect_to tickets_production_path(@bike_request.production, tab: "distributed")
@@ -137,7 +137,8 @@ class BikeRequestsController < ApplicationController
       body = reason ? "#{@bike_request.codename} was denied: #{reason}" : "#{@bike_request.codename} was denied."
       PushNotifier.notify(users: [ @bike_request.user ], title: "Request denied", body: body)
     when "ready_for_delivery"
-      PushNotifier.notify(users: [ @bike_request.user ], title: "Bikes ready for delivery",
+      recipients = [ @bike_request.user, @bike_request.owner ].compact.uniq
+      PushNotifier.notify(users: recipients, title: "Bikes ready for delivery",
         body: "#{@bike_request.codename} is ready for delivery.")
     when "delivered"
       PushNotifier.notify(users: [ @bike_request.user ], title: "Delivered",
@@ -184,7 +185,8 @@ class BikeRequestsController < ApplicationController
   end
 
   def authorized_to_complete_delivery?
-    current_user == @bike_request.taker || production_master_mechanic?(@bike_request.production)
+    current_user == @bike_request.owner || current_user == @bike_request.taker ||
+      production_admin?(@bike_request.production) || production_master_mechanic?(@bike_request.production)
   end
 
   def authorized_for_status_correction?
