@@ -9,16 +9,16 @@ export default class extends Controller {
     bikes.forEach(function(b, i) {
       var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4]
       var rows = []
-      rows.push('<div style="font-size:9pt;font-weight:bold;margin-bottom:2mm">' + source + '</div>')
-      rows.push('<div style="font-size:8pt;margin:0.5mm 0">Name: ' + (name || '-') + '</div>')
-      rows.push('<div style="font-size:8pt;margin:0.5mm 0">Sex: ' + (type || '-') + '</div>')
-      rows.push('<div style="font-size:8pt;margin:0.5mm 0">Age: ' + (age || '-') + '</div>')
-      rows.push('<div style="font-size:8pt;margin:0.5mm 0">Height: ' + (height || '-') + '</div>')
-      rows.push('<div style="font-size:8pt;margin:0.5mm 0">Notes: ' + (notes || '-') + '</div>')
+      rows.push('<div style="font-size:13pt;font-weight:bold;margin-bottom:2mm">' + source + '</div>')
+      rows.push('<div style="font-size:12pt;margin:0.5mm 0">Name: ' + (name || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;margin:0.5mm 0">Sex: ' + (type || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;margin:0.5mm 0">Age: ' + (age || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;margin:0.5mm 0">Height: ' + (height || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;margin:0.5mm 0">Notes: ' + (notes || '-') + '</div>')
       var footer =
         '<div style="text-align:center">' +
           '<div style="font-size:20pt;font-weight:bold;line-height:1.1">' + codename + '</div>' +
-          '<div style="font-size:11pt;margin-top:1mm">' + (i + 1) + '/' + bikes.length + '</div>' +
+          '<div style="font-size:15pt;margin-top:1mm">' + (i + 1) + '/' + bikes.length + '</div>' +
         '</div>'
       pages.push(
         '<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') +
