@@ -10,12 +10,25 @@ export default class extends Controller {
     this._syncCountInput()
   }
 
+  selectAll() {
+    this.countInputTarget.select()
+  }
+
   setCount() {
+    const n = parseInt(this.countInputTarget.value, 10)
+    if (isNaN(n)) return
+    this._syncRows(Math.max(MIN_BIKES, Math.min(this.maxBikesValue, n)))
+  }
+
+  normalizeCount() {
     let n = parseInt(this.countInputTarget.value, 10)
     if (isNaN(n)) n = MIN_BIKES
     n = Math.max(MIN_BIKES, Math.min(this.maxBikesValue, n))
     this.countInputTarget.value = n
+    this._syncRows(n)
+  }
 
+  _syncRows(n) {
     const current = this._countActive()
     if (n > current) {
       for (let i = current; i < n; i++) this._addRow()

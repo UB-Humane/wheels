@@ -21,8 +21,8 @@
           How many bikes?
           %span.text-red-600 *
         %input.w-32.px-4.py-3.text-xl.border-2.border-gray-400.focus:border-gray-900.focus:outline-none{
-          type: "number", min: "1", max: BikeRequest::MAX_BIKES, value: [@bike_request.bikes.size, 1].max, required: true,
-          data: { "bike-form-target": "countInput", action: "input->bike-form#setCount" }
+          type: "number", value: [@bike_request.bikes.size, 1].max, required: true,
+          data: { "bike-form-target": "countInput", action: "focus->bike-form#selectAll input->bike-form#setCount blur->bike-form#normalizeCount" }
         }
       %p.text-xl.font-semibold.text-gray-900.mb-3 Bikes
       .overflow-x-auto
