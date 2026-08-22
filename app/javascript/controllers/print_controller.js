@@ -57,7 +57,7 @@ export default class extends Controller {
       '</div>' +
       '<table style="width:100%;border-collapse:collapse">' + rows + '</table>'
     var win = window.open('', '_blank', 'width=700,height=1000')
-    win.document.write('<html><head><style>@page { size: A5; margin: 8mm; }</style></head><body style="font-family:sans-serif;padding:20px;max-width:660px">' + html + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
+    win.document.write('<html><head><style>@page { size: A5; margin: 8mm; }</style></head><body style="font-family:sans-serif;padding:120px 20px 20px;max-width:660px">' + html + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
     win.document.close()
   }
 }
