@@ -8,8 +8,10 @@
     - @productions.each do |production|
       .flex.items-center.justify-between.px-6.py-5.border-2.border-gray-900
         %span.text-2xl.font-bold.text-gray-900= production.name
-        = button_to "Remove", admin_production_path(production), method: :delete,
-            data: { turbo_confirm: "Remove #{production.name}?" },
-            class: "px-4 py-2 text-lg font-medium text-red-700 underline bg-transparent border-0 cursor-pointer"
+        .flex.items-center.gap-6.shrink-0
+          = link_to "Edit", edit_admin_production_path(production), class: "px-4 py-2 text-lg font-medium text-gray-900 underline"
+          = button_to "Remove", admin_production_path(production), method: :delete,
+              data: { turbo_confirm: "Remove #{production.name}?" },
+              class: "px-4 py-2 text-lg font-medium text-red-700 underline bg-transparent border-0 cursor-pointer"
 - else
   %p.text-xl.text-gray-500 No productions yet.

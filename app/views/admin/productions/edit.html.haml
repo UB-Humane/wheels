@@ -1,0 +1,46 @@
+- content_for :title, "Edit Production"
+%h1.text-3xl.font-bold.text-gray-900.mb-8 Edit Production
+
+= form_with model: [:admin, @production], class: "space-y-6 max-w-lg" do |f|
+  .space-y-2
+    = f.label :name, "Production name", class: "block text-xl font-medium text-gray-900"
+    = f.text_field :name, autofocus: true,
+        class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+    - @production.errors[:name].each do |msg|
+      %p.text-lg.text-red-700= msg
+
+  .space-y-4.pt-6.border-t-2.border-gray-200
+    %h2.text-2xl.font-bold.text-gray-900 Print Settings
+    %p.text-lg.text-gray-500 Padding (in pixels) around the "Print Overview" page.
+
+    .space-y-2
+      = f.label :print_padding_top, "Top padding", class: "block text-xl font-medium text-gray-900"
+      = f.number_field :print_padding_top, min: 0,
+          class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+      - @production.errors[:print_padding_top].each do |msg|
+        %p.text-lg.text-red-700= msg
+
+    .space-y-2
+      = f.label :print_padding_right, "Right padding", class: "block text-xl font-medium text-gray-900"
+      = f.number_field :print_padding_right, min: 0,
+          class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+      - @production.errors[:print_padding_right].each do |msg|
+        %p.text-lg.text-red-700= msg
+
+    .space-y-2
+      = f.label :print_padding_bottom, "Bottom padding", class: "block text-xl font-medium text-gray-900"
+      = f.number_field :print_padding_bottom, min: 0,
+          class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+      - @production.errors[:print_padding_bottom].each do |msg|
+        %p.text-lg.text-red-700= msg
+
+    .space-y-2
+      = f.label :print_padding_left, "Left padding", class: "block text-xl font-medium text-gray-900"
+      = f.number_field :print_padding_left, min: 0,
+          class: "w-full px-4 py-3 text-xl border-2 border-gray-400 focus:border-gray-900 focus:outline-none"
+      - @production.errors[:print_padding_left].each do |msg|
+        %p.text-lg.text-red-700= msg
+
+  .flex.gap-4
+    = f.submit "Save", class: "px-6 py-3 text-lg font-bold text-white bg-gray-900 hover:bg-gray-700 cursor-pointer transition-colors"
+    = link_to "Cancel", admin_productions_path, class: "px-6 py-3 text-lg font-medium text-gray-900 underline"

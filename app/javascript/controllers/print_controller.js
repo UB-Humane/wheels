@@ -1,7 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { bikes: Array, requestor: String, source: String, codename: String, phone: String, owner: String, due: String }
+  static values = {
+    bikes: Array, requestor: String, source: String, codename: String, phone: String, owner: String, due: String,
+    paddingTop: Number, paddingRight: Number, paddingBottom: Number, paddingLeft: Number
+  }
 
   printLabels() {
     const bikes = this.bikesValue, source = this.sourceValue, codename = this.codenameValue
@@ -56,8 +59,9 @@ export default class extends Controller {
         '<div style="font-size:13pt;color:#555;margin-top:3px">Due ' + due + '</div>' +
       '</div>' +
       '<table style="width:100%;border-collapse:collapse">' + rows + '</table>'
+    var padding = this.paddingTopValue + 'px ' + this.paddingRightValue + 'px ' + this.paddingBottomValue + 'px ' + this.paddingLeftValue + 'px'
     var win = window.open('', '_blank', 'width=700,height=1000')
-    win.document.write('<html><head><style>@page { size: A5; margin: 8mm; }</style></head><body style="font-family:sans-serif;padding:120px 20px 20px;max-width:660px">' + html + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
+    win.document.write('<html><head><style>@page { size: A5; margin: 8mm; }</style></head><body style="font-family:sans-serif;padding:' + padding + ';max-width:660px">' + html + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
     win.document.close()
   }
 }

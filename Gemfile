@@ -70,3 +70,5 @@ gem "omniauth-google-oauth2", "~> 1.1"
 gem "omniauth-rails_csrf_protection", "~> 1.0"
 
 gem "web-push", "~> 3.0"
+
+gem "store_attribute", "~> 1.2"

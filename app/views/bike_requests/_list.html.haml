@@ -18,7 +18,11 @@
                 "print-codename-value":  req.codename,
                 "print-phone-value":     req.user.mobile_number,
                 "print-owner-value":     req.owner.present? ? "#{req.owner.name} (#{req.owner.mobile_number})" : "",
-                "print-due-value":       req.due_date.strftime("%-m/%-d/%Y") }}
+                "print-due-value":       req.due_date.strftime("%-m/%-d/%Y"),
+                "print-padding-top-value":    req.production.print_padding_top,
+                "print-padding-right-value":  req.production.print_padding_right,
+                "print-padding-bottom-value": req.production.print_padding_bottom,
+                "print-padding-left-value":   req.production.print_padding_left }}
         .flex.flex-col.sm:flex-row.sm:items-start.sm:justify-between.gap-3.sm:gap-4
           .space-y-1
             .flex.flex-wrap.items-baseline.gap-2

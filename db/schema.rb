@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_14_153649) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_22_145556) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -82,6 +82,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_14_153649) do
   create_table "productions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", null: false
+    t.jsonb "settings", default: {"print_padding_top" => 120, "print_padding_left" => 20, "print_padding_right" => 20, "print_padding_bottom" => 20}, null: false
     t.datetime "updated_at", null: false
   end
 

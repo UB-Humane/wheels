@@ -66,6 +66,49 @@ class Admin::ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  # --- edit ---
+
+  test "edit requires superadmin" do
+    login_as_regular_user
+    get edit_admin_production_path(productions(:second_production))
+    assert_response :forbidden
+  end
+
+  test "edit renders form for superadmin" do
+    login_as_superadmin
+    get edit_admin_production_path(productions(:second_production))
+    assert_response :success
+  end
+
+  # --- update ---
+
+  test "update requires superadmin" do
+    login_as_regular_user
+    patch admin_production_path(productions(:second_production)), params: { production: { name: "Renamed" } }
+    assert_response :forbidden
+  end
+
+  test "update saves print padding and redirects to index" do
+    login_as_superadmin
+    production = productions(:second_production)
+    patch admin_production_path(production), params: {
+      production: { name: production.name, print_padding_top: 200, print_padding_right: 30, print_padding_bottom: 30, print_padding_left: 30 }
+    }
+    assert_redirected_to admin_productions_path
+    production.reload
+    assert_equal 200, production.print_padding_top
+    assert_equal 30, production.print_padding_right
+  end
+
+  test "update with invalid padding re-renders edit form" do
+    login_as_superadmin
+    production = productions(:second_production)
+    patch admin_production_path(production), params: {
+      production: { name: production.name, print_padding_top: -5 }
+    }
+    assert_response :unprocessable_entity
+  end
+
   # --- destroy ---
 
   test "destroy requires superadmin" do
