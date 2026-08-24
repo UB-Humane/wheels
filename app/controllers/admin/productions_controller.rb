@@ -41,6 +41,6 @@ class Admin::ProductionsController < Admin::BaseController
   end
 
   def production_params
-    params.require(:production).permit(:name, :print_padding_top, :print_padding_right, :print_padding_bottom, :print_padding_left)
+    params.require(:production).permit(:name, :print_padding_top, :print_padding_right, :print_padding_bottom, :print_padding_left, :print_font)
   end
 end

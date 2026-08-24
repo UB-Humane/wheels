@@ -1,9 +1,17 @@
 import { Controller } from "@hotwired/stimulus"
 
+const FONTS_URL = "https://fonts.googleapis.com/css2?" +
+  "family=Inter:wght@400;700" +
+  "&family=Noto+Sans:wght@400;700" +
+  "&family=IBM+Plex+Sans:wght@400;700" +
+  "&family=Public+Sans:wght@400;700" +
+  "&family=Atkinson+Hyperlegible:wght@400;700" +
+  "&display=swap"
+
 export default class extends Controller {
   static values = {
     bikes: Array, requestor: String, source: String, codename: String, phone: String, owner: String, due: String,
-    paddingTop: Number, paddingRight: Number, paddingBottom: Number, paddingLeft: Number
+    paddingTop: Number, paddingRight: Number, paddingBottom: Number, paddingLeft: Number, font: String
   }
 
   printLabels() {
@@ -12,27 +20,28 @@ export default class extends Controller {
     bikes.forEach(function(b, i) {
       var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4]
       var rows = []
-      rows.push('<div style="font-size:13pt;font-weight:bold;margin-bottom:2mm">' + source + '</div>')
-      rows.push('<div style="font-size:12pt;margin:0.5mm 0">Name: ' + (name || '-') + '</div>')
-      rows.push('<div style="font-size:12pt;margin:0.5mm 0">Sex: ' + (type || '-') + '</div>')
-      rows.push('<div style="font-size:12pt;margin:0.5mm 0">Age: ' + (age || '-') + '</div>')
-      rows.push('<div style="font-size:12pt;margin:0.5mm 0">Height: ' + (height || '-') + '</div>')
-      rows.push('<div style="font-size:12pt;margin:0.5mm 0">Notes: ' + (notes || '-') + '</div>')
+      rows.push('<div style="font-size:13pt;font-weight:bold;line-height:1.25;margin-bottom:2mm">' + source + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Name: ' + (name || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Sex: ' + (type || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Age: ' + (age || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Height: ' + (height || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Notes: ' + (notes || '-') + '</div>')
       var footer =
         '<div style="text-align:center">' +
           '<div style="font-size:20pt;font-weight:bold;line-height:1.1">' + codename + '</div>' +
-          '<div style="font-size:15pt;margin-top:1mm">' + (i + 1) + '/' + bikes.length + '</div>' +
+          '<div style="font-size:15pt;line-height:1.25;margin-top:1mm">' + (i + 1) + '/' + bikes.length + '</div>' +
         '</div>'
       pages.push(
         '<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') +
-          'width:50mm;height:80mm;box-sizing:border-box;padding:3mm 3mm 6mm;display:flex;flex-direction:column;justify-content:space-between">' +
+          'width:50mm;height:80mm;box-sizing:border-box;padding:3mm 3mm 6mm;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between">' +
           '<div>' + rows.join('') + '</div>' +
           footer +
         '</div>'
       )
     })
+    var font = "'" + this.fontValue + "', sans-serif"
     var win = window.open('', '_blank', 'width=400,height=600')
-    win.document.write('<html><head><style>@page { size: 50mm 80mm; margin: 0; }</style></head><body style="font-family:sans-serif;margin:0">' + pages.join('') + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
+    win.document.write('<html><head><link rel="stylesheet" href="' + FONTS_URL + '"><style>@page { size: 50mm 80mm; margin: 0; }</style></head><body style="font-family:' + font + ';margin:0">' + pages.join('') + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
     win.document.close()
   }
 
@@ -60,8 +69,9 @@ export default class extends Controller {
       '</div>' +
       '<table style="width:100%;border-collapse:collapse">' + rows + '</table>'
     var padding = this.paddingTopValue + 'px ' + this.paddingRightValue + 'px ' + this.paddingBottomValue + 'px ' + this.paddingLeftValue + 'px'
+    var font = "'" + this.fontValue + "', sans-serif"
     var win = window.open('', '_blank', 'width=700,height=1000')
-    win.document.write('<html><head><style>@page { size: A5; margin: 8mm; }</style></head><body style="font-family:sans-serif;padding:' + padding + ';max-width:660px">' + html + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
+    win.document.write('<html><head><link rel="stylesheet" href="' + FONTS_URL + '"><style>@page { size: A5; margin: 8mm; }</style></head><body style="font-family:' + font + ';padding:' + padding + ';max-width:660px">' + html + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
     win.document.close()
   }
 }

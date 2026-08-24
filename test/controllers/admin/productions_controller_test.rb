@@ -109,6 +109,26 @@ class Admin::ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "update saves print font and redirects to index" do
+    login_as_superadmin
+    production = productions(:second_production)
+    patch admin_production_path(production), params: {
+      production: { name: production.name, print_font: "public_sans" }
+    }
+    assert_redirected_to admin_productions_path
+    production.reload
+    assert_equal "public_sans", production.print_font
+  end
+
+  test "update with invalid print font re-renders edit form" do
+    login_as_superadmin
+    production = productions(:second_production)
+    patch admin_production_path(production), params: {
+      production: { name: production.name, print_font: "comic_sans" }
+    }
+    assert_response :unprocessable_entity
+  end
+
   # --- destroy ---
 
   test "destroy requires superadmin" do

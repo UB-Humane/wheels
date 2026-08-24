@@ -55,6 +55,27 @@ class ProductionTest < ActiveSupport::TestCase
     assert_includes production.errors[:print_padding_top], "must be greater than or equal to 0"
   end
 
+  test "print font defaults to atkinson hyperlegible when unset" do
+    production = productions(:main_production)
+    assert_equal "atkinson_hyperlegible", production.print_font
+    assert_equal "Atkinson Hyperlegible", production.print_font_family
+  end
+
+  test "print font persists to settings" do
+    production = productions(:main_production)
+    production.update!(print_font: "public_sans")
+    production.reload
+    assert_equal "public_sans", production.print_font
+    assert_equal "Public Sans", production.print_font_family
+  end
+
+  test "unrecognized print font is invalid" do
+    production = productions(:main_production)
+    production.print_font = "comic_sans"
+    assert_not production.valid?
+    assert_includes production.errors[:print_font], "is not included in the list"
+  end
+
   test "destroying production destroys associated bike_requests" do
     production = Production.create!(name: "Temp Production")
     dist = distributions(:downtown_dist)
