@@ -125,6 +125,13 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "taken_up", assigns(:tab)
   end
 
+  test "delivery accepts distributed tab" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    get delivery_production_path(productions(:main_production)), params: { tab: "distributed" }
+    assert_response :success
+    assert_equal "distributed", assigns(:tab)
+  end
+
   # --- inventory action ---
 
   test "inventory requires authentication" do

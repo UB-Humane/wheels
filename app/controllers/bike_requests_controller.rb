@@ -51,12 +51,12 @@ class BikeRequestsController < ApplicationController
 
   def update
     if params[:status] == "distributed"
-      return render plain: "Access denied", status: :forbidden unless requestor_for?(@bike_request) || authorized_for_status_correction?
+      return render plain: "Access denied", status: :forbidden unless requestor_for?(@bike_request)
       @bike_request.update!(status: :distributed)
-      if @bike_request.distribution.present? && current_user&.distributions&.include?(@bike_request.distribution)
+      if @bike_request.distribution.present?
         redirect_to tickets_distribution_path(@bike_request.distribution, tab: "distributed")
       else
-        redirect_to tickets_production_path(@bike_request.production, tab: "distributed")
+        redirect_to delivery_production_path(@bike_request.production, tab: "distributed")
       end
     elsif params[:status].in?(%w[approve deny ready_for_delivery taken_up delivered archive unarchive] + BACK_TRANSITION_STATUSES)
       return render plain: "Access denied", status: :forbidden unless authorized_for_production?

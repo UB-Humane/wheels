@@ -130,7 +130,7 @@
                 = button_to "Back to Ready for Delivery", bike_request_path(req), method: :patch, params: { status: "back_to_ready_for_delivery" }, form: form_width,
                     class: secondary_btn
             - elsif req.delivered?
-              - if (req.distribution.nil? && requestor_for?(req)) || can_correct_status
+              - if req.distribution.nil? && requestor_for?(req)
                 = button_to "Mark Distributed", bike_request_path(req), method: :patch, params: { status: "distributed" }, form: form_width,
                     class: primary_btn
               - if can_correct_status
