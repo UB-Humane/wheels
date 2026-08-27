@@ -1,6 +1,6 @@
 class BikeRequest < ApplicationRecord
   MAX_BIKES = 15
-  DELIVERY_STATUSES = %w[ready_for_delivery taken_up delivered distributed]
+  DELIVERY_STATUSES = %w[ready_for_delivery taken_up delivered]
   MECHANIC_STATUSES = %w[pending ready_for_delivery taken_up]
   CLOSED_STATUSES = %w[delivered distributed]
   CODENAME_ADJECTIVES = Rails.root.join("lib/data/adjectives.txt").readlines(chomp: true).freeze

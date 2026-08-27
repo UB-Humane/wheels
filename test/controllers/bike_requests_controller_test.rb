@@ -374,12 +374,12 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert br.reload.distributed?
   end
 
-  test "update distributed redirects production user to production delivery distributed tab" do
+  test "update distributed redirects production user to production delivery dashboard" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     br = bike_requests(:completed_bike)
     br.update_columns(distribution_id: nil)
     patch bike_request_path(br), params: { status: "distributed" }
-    assert_redirected_to delivery_production_path(productions(:main_production), tab: "distributed")
+    assert_redirected_to delivery_production_path(productions(:main_production))
   end
 
   test "update delivered from ready_for_delivery sets status to delivered for an admin" do

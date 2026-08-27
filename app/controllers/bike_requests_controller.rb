@@ -56,7 +56,7 @@ class BikeRequestsController < ApplicationController
       if @bike_request.distribution.present?
         redirect_to tickets_distribution_path(@bike_request.distribution, tab: "distributed")
       else
-        redirect_to delivery_production_path(@bike_request.production, tab: "distributed")
+        redirect_to delivery_production_path(@bike_request.production)
       end
     elsif params[:status].in?(%w[approve deny ready_for_delivery taken_up delivered archive unarchive] + BACK_TRANSITION_STATUSES)
       return render plain: "Access denied", status: :forbidden unless authorized_for_production?
