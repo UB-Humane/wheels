@@ -7,7 +7,9 @@
 - if bike_requests.any?
   .space-y-4
     - bike_requests.each do |req|
-      - card_border = (req.denied? || req.overdue?) ? "border-2 border-red-600" : "border-2 border-gray-900"
+      - card_border = "border-2 border-gray-900"
+      - card_border = "border-2 border-green-600" if req.printed?
+      - card_border = "border-2 border-red-600" if req.denied? || req.overdue?
       - can_correct_status = production_view && (production_admin?(req.production) || production_master_mechanic?(req.production))
       - can_complete_delivery = production_view && (can_correct_status || current_user == req.owner || current_user == req.taker)
       .px-6.py-5.space-y-4{class: card_border,
@@ -23,7 +25,8 @@
                 "print-padding-right-value":  req.production.print_padding_right,
                 "print-padding-bottom-value": req.production.print_padding_bottom,
                 "print-padding-left-value":   req.production.print_padding_left,
-                "print-font-value":           req.production.print_font_family }}
+                "print-font-value":           req.production.print_font_family,
+                "print-mark-printed-url-value": mark_printed_bike_request_path(req) }}
         .flex.flex-col.sm:flex-row.sm:items-start.sm:justify-between.gap-3.sm:gap-4
           .space-y-1
             .flex.flex-wrap.items-baseline.gap-2
@@ -48,8 +51,8 @@
               - if req.denial_reason.present?
                 %p.text-lg.text-red-600= req.denial_reason
             .flex.flex-wrap.items-center.gap-4
-              - if req.overdue?
-                %p.text-lg.font-bold.text-red-600 OVERDUE
+              %p.text-lg.font-bold.text-red-600{ hidden: !req.overdue? } OVERDUE
+              %p.text-lg.font-bold.text-green-700{ hidden: !req.printed?, data: { "print-target": "printedBadge" } } PRINTED
               %p.text-lg.font-medium.text-gray-900 Due #{req.due_date.strftime("%-m/%-d/%Y")}
               - if production_view && !req.archived?
                 = button_to bike_request_path(req), method: :patch, params: { status: "archive" }, class: "p-1 text-gray-400 hover:text-gray-700 bg-transparent border-0 cursor-pointer", title: "Archive", form: { style: "display:inline" } do

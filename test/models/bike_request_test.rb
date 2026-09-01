@@ -170,4 +170,16 @@ class BikeRequestTest < ActiveSupport::TestCase
     br = bike_requests(:taken_up_bike)
     assert_not br.overdue?
   end
+
+  test "printed defaults to false" do
+    br = bike_requests(:completed_bike)
+    assert_not br.printed?
+  end
+
+  test "printed persists once set" do
+    br = bike_requests(:completed_bike)
+    br.update!(printed: true)
+    br.reload
+    assert br.printed?
+  end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_22_145556) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_01_202040) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -22,6 +22,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_22_145556) do
     t.bigint "distribution_id"
     t.date "due_date", null: false
     t.bigint "owner_id"
+    t.boolean "printed", default: false, null: false
     t.bigint "production_id", null: false
     t.integer "status", default: 1, null: false
     t.integer "status_before_archival"

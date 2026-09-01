@@ -5,7 +5,7 @@ class BikeRequestsController < ApplicationController
   before_action :check_distribution_access, only: [ :new, :create ], if: -> { params[:distribution_id].present? }
   before_action :set_production_requester,  only: [ :new, :create ], if: -> { params[:production_id].present? }
   before_action :check_production_access,   only: [ :new, :create ], if: -> { params[:production_id].present? }
-  before_action :set_bike_request, only: [ :edit, :update, :complete_all ]
+  before_action :set_bike_request, only: [ :edit, :update, :complete_all, :mark_printed ]
 
   def new
     @bike_request = BikeRequest.new(due_date: Date.today + 14)
@@ -47,6 +47,12 @@ class BikeRequestsController < ApplicationController
       notify_status_change("ready_for_delivery")
     end
     redirect_to delivery_production_path(@bike_request.production, tab: "ready_for_delivery")
+  end
+
+  def mark_printed
+    return render plain: "Access denied", status: :forbidden unless authorized_for_production?
+    @bike_request.update!(printed: true)
+    head :ok
   end
 
   def update
@@ -91,7 +97,7 @@ class BikeRequestsController < ApplicationController
     when "delivered"    then { status: :delivered }
     when "archive"      then { status: :archived, status_before_archival: @bike_request.read_attribute(:status) }
     when "unarchive"    then { status: restored, status_before_archival: nil }
-    when "back_to_requested"         then { status: :requested, owner_id: nil, taker_id: nil }
+    when "back_to_requested"         then { status: :requested, owner_id: nil, taker_id: nil, printed: false }
     when "back_to_pending"            then { status: :pending }
     when "back_to_ready_for_delivery" then { status: :ready_for_delivery }
     when "back_to_taken_up"           then { status: :taken_up }

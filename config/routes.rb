@@ -26,6 +26,7 @@ Rails.application.routes.draw do
 
   resources :bike_requests,  only: [ :edit, :update ] do
     patch :complete_all, on: :member
+    patch :mark_printed,  on: :member
   end
   resources :bikes,          only: [ :update ]
   resources :productions,    only: [ :show ] do

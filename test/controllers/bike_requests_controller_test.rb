@@ -533,6 +533,14 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_nil br.taker
   end
 
+  test "update back_to_requested clears printed" do
+    br = bike_requests(:pending_bike)
+    br.update_columns(printed: true)
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch bike_request_path(br), params: { status: "back_to_requested" }
+    assert_not br.reload.printed?
+  end
+
   test "update back_to_pending moves ready_for_delivery back to pending and is admin/master-mechanic only" do
     post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
     patch bike_request_path(bike_requests(:completed_bike)), params: { status: "back_to_pending" }
@@ -655,6 +663,33 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { email: users(:master_mechanic_user).email, password: "password" }
     patch complete_all_bike_request_path(bike_requests(:pending_bike))
     assert_redirected_to delivery_production_path(productions(:main_production), tab: "ready_for_delivery")
+  end
+
+  # --- mark_printed ---
+
+  test "mark_printed requires authentication" do
+    patch mark_printed_bike_request_path(bike_requests(:completed_bike))
+    assert_redirected_to login_path
+  end
+
+  test "mark_printed returns 403 for distribution user" do
+    post login_path, params: { email: users(:dist_user).email, password: "password" }
+    patch mark_printed_bike_request_path(bike_requests(:completed_bike))
+    assert_response :forbidden
+  end
+
+  test "mark_printed allows a plain volunteer" do
+    post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
+    patch mark_printed_bike_request_path(bike_requests(:completed_bike))
+    assert_response :success
+    assert bike_requests(:completed_bike).reload.printed?
+  end
+
+  test "mark_printed allows a production admin" do
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch mark_printed_bike_request_path(bike_requests(:completed_bike))
+    assert_response :success
+    assert bike_requests(:completed_bike).reload.printed?
   end
 
   # --- update: distribution resubmit ---

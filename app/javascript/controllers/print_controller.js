@@ -9,9 +9,11 @@ const FONTS_URL = "https://fonts.googleapis.com/css2?" +
   "&display=swap"
 
 export default class extends Controller {
+  static targets = [ "printedBadge" ]
   static values = {
     bikes: Array, requestor: String, source: String, codename: String, phone: String, owner: String, due: String,
-    paddingTop: Number, paddingRight: Number, paddingBottom: Number, paddingLeft: Number, font: String
+    paddingTop: Number, paddingRight: Number, paddingBottom: Number, paddingLeft: Number, font: String,
+    markPrintedUrl: String
   }
 
   printLabels() {
@@ -43,6 +45,22 @@ export default class extends Controller {
     var win = window.open('', '_blank', 'width=400,height=600')
     win.document.write('<html><head><link rel="stylesheet" href="' + FONTS_URL + '"><style>@page { size: 50mm 80mm; margin: 0; }</style></head><body style="font-family:' + font + ';margin:0">' + pages.join('') + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
     win.document.close()
+    this._markPrinted()
+  }
+
+  _markPrinted() {
+    const token = document.querySelector('meta[name="csrf-token"]').content
+    fetch(this.markPrintedUrlValue, {
+      method: "PATCH",
+      headers: { "X-CSRF-Token": token }
+    }).then(response => {
+      if (!response.ok) return
+      if (this.hasPrintedBadgeTarget) this.printedBadgeTarget.hidden = false
+      if (!this.element.classList.contains("border-red-600")) {
+        this.element.classList.remove("border-gray-900")
+        this.element.classList.add("border-green-600")
+      }
+    })
   }
 
   printCard() {
