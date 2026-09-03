@@ -8,15 +8,28 @@ const FONTS_URL = "https://fonts.googleapis.com/css2?" +
   "&family=Atkinson+Hyperlegible:wght@400;700" +
   "&display=swap"
 
-// window.onload fires once the Google Fonts stylesheet reference has loaded, not once the
-// actual webfont files have downloaded and swapped in — printing on load risked capturing the
-// page still in its fallback font, reintroducing the very cross-browser metrics mismatch this
-// was meant to fix. document.fonts.ready waits for the real font to actually be applied.
-const PRINT_SCRIPT =
-  '<script>' +
-    'function go(){window.print();window.close();}' +
-    'if (document.fonts && document.fonts.ready) { document.fonts.ready.then(go); } else { window.onload = go; }' +
-  '<\/script>'
+// document.fonts.ready only accounts for fonts the browser already knows about — if it's
+// checked before the Google Fonts <link> has even finished loading, the @font-face rules
+// aren't registered yet and it resolves as a no-op, so printing can still capture the page in
+// its fallback font (the exact cross-browser metrics mismatch the webfont was meant to fix).
+// Waiting on the <link>'s own onload first guarantees the font-face rules are registered
+// before checking document.fonts.ready; onerror/setTimeout are fallbacks so a network hiccup
+// (this depends on Google Fonts' CDN at print time) can't block printing forever.
+function printHead(pageCss) {
+  return '<head>' +
+    '<script>' +
+      'var __printed = false;' +
+      'function __go(){' +
+        'if (__printed) return; __printed = true;' +
+        'if (document.fonts && document.fonts.ready) { document.fonts.ready.then(function(){window.print();window.close();}); }' +
+        'else { window.print(); window.close(); }' +
+      '}' +
+      'setTimeout(__go, 3000);' +
+    '<\/script>' +
+    '<link rel="stylesheet" href="' + FONTS_URL + '" onload="__go()" onerror="__go()">' +
+    '<style>' + pageCss + '</style>' +
+  '</head>'
+}
 
 export default class extends Controller {
   static targets = [ "printedBadge" ]
@@ -53,7 +66,7 @@ export default class extends Controller {
     })
     var font = "'" + this.fontValue + "', sans-serif"
     var win = window.open('', '_blank', 'width=400,height=600')
-    win.document.write('<html><head><link rel="stylesheet" href="' + FONTS_URL + '"><style>@page { size: 50mm 80mm; margin: 0; }</style></head><body style="font-family:' + font + ';margin:0">' + pages.join('') + PRINT_SCRIPT + '</body></html>')
+    win.document.write('<html>' + printHead('@page { size: 50mm 80mm; margin: 0; }') + '<body style="font-family:' + font + ';margin:0">' + pages.join('') + '</body></html>')
     win.document.close()
     this._markPrinted()
   }
@@ -117,7 +130,7 @@ export default class extends Controller {
     var padding = this.paddingTopValue + 'px ' + this.paddingRightValue + 'px ' + this.paddingBottomValue + 'px ' + this.paddingLeftValue + 'px'
     var font = "'" + this.fontValue + "', sans-serif"
     var win = window.open('', '_blank', 'width=700,height=1000')
-    win.document.write('<html><head><link rel="stylesheet" href="' + FONTS_URL + '"><style>@page { size: A5; margin: 8mm; }</style></head><body style="font-family:' + font + ';padding:' + padding + ';max-width:660px">' + html + PRINT_SCRIPT + '</body></html>')
+    win.document.write('<html>' + printHead('@page { size: A5; margin: 8mm; }') + '<body style="font-family:' + font + ';padding:' + padding + ';max-width:660px">' + html + '</body></html>')
     win.document.close()
   }
 }
