@@ -45,20 +45,20 @@ export default class extends Controller {
     bikes.forEach(function(b, i) {
       var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4]
       var rows = []
-      rows.push('<div style="font-size:10pt;font-weight:bold;line-height:1.2;margin-bottom:1.5mm">' + source + '</div>')
-      rows.push('<div style="font-size:9pt;line-height:1.2;margin:0.3mm 0">Name: ' + (name || '-') + '</div>')
-      rows.push('<div style="font-size:9pt;line-height:1.2;margin:0.3mm 0">Sex: ' + (type || '-') + '</div>')
-      rows.push('<div style="font-size:9pt;line-height:1.2;margin:0.3mm 0">Age: ' + (age || '-') + '</div>')
-      rows.push('<div style="font-size:9pt;line-height:1.2;margin:0.3mm 0">Height: ' + (height || '-') + '</div>')
-      rows.push('<div style="font-size:9pt;line-height:1.2;margin:0.3mm 0">Notes: ' + (notes || '-') + '</div>')
+      rows.push('<div style="font-size:13pt;font-weight:bold;line-height:1.25;margin-bottom:2mm">' + source + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Name: ' + (name || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Sex: ' + (type || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Age: ' + (age || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Height: ' + (height || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Notes: ' + (notes || '-') + '</div>')
       var footer =
         '<div style="text-align:center">' +
-          '<div style="font-size:15pt;font-weight:bold;line-height:1.1">' + codename + '</div>' +
-          '<div style="font-size:11pt;line-height:1.2;margin-top:0.6mm">' + (i + 1) + '/' + bikes.length + '</div>' +
+          '<div style="font-size:20pt;font-weight:bold;line-height:1.1">' + codename + '</div>' +
+          '<div style="font-size:15pt;line-height:1.25;margin-top:1mm">' + (i + 1) + '/' + bikes.length + '</div>' +
         '</div>'
       pages.push(
         '<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') +
-          'width:50mm;height:80mm;box-sizing:border-box;padding:2mm 2mm 3mm;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between">' +
+          'width:50mm;height:80mm;box-sizing:border-box;padding:3mm 3mm 6mm;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between">' +
           '<div>' + rows.join('') + '</div>' +
           footer +
         '</div>'
