@@ -97,7 +97,13 @@ export default class extends Controller {
           '<th style="' + headerStyle + '">Notes</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
-      '</table>'
+      '</table>' +
+      '<div style="margin-top:28px">' +
+        '<div style="font-size:11pt;color:#888;margin-bottom:12px">Notes</div>' +
+        '<div style="border-bottom:1px solid #999;height:32px"></div>' +
+        '<div style="border-bottom:1px solid #999;height:32px"></div>' +
+        '<div style="border-bottom:1px solid #999;height:32px"></div>' +
+      '</div>'
     var padding = this.paddingTopValue + 'px ' + this.paddingRightValue + 'px ' + this.paddingBottomValue + 'px ' + this.paddingLeftValue + 'px'
     var font = "'" + this.fontValue + "', sans-serif"
     var win = window.open('', '_blank', 'width=700,height=1000')
