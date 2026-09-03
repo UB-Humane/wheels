@@ -65,18 +65,20 @@ export default class extends Controller {
 
   printCard() {
     const bikes = this.bikesValue, requestor = this.requestorValue, source = this.sourceValue, codename = this.codenameValue, phone = this.phoneValue, owner = this.ownerValue, due = this.dueValue
+    var cellStyle = 'padding:4px 8px;font-size:11pt;text-align:left;white-space:nowrap'
     var rows = ''
     bikes.forEach(function(b, i) {
       var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4]
-      var specs = [type, age ? 'Age ' + age : '', height].filter(Boolean).join(' · ')
       rows += '<tr style="border-bottom:1px solid #ddd">'
-      rows += '<td style="padding:8px 10px;font-size:13pt;color:#888;vertical-align:top">' + (i + 1) + '</td>'
-      rows += '<td style="padding:8px 10px;vertical-align:top">'
-      if (name) rows += '<div style="font-size:15pt;font-weight:bold;margin-bottom:2px">' + name + '</div>'
-      rows += '<div style="font-size:13pt;color:#333">' + specs + '</div>'
-      if (notes) rows += '<div style="font-size:12pt;color:#666;margin-top:3px">' + notes + '</div>'
-      rows += '</td></tr>'
+      rows += '<td style="' + cellStyle + ';color:#888">' + (i + 1) + '</td>'
+      rows += '<td style="' + cellStyle + ';font-weight:bold">' + (name || '-') + '</td>'
+      rows += '<td style="' + cellStyle + '">' + (type || '-') + '</td>'
+      rows += '<td style="' + cellStyle + '">' + (age || '-') + '</td>'
+      rows += '<td style="' + cellStyle + '">' + (height || '-') + '</td>'
+      rows += '<td style="' + cellStyle + ';color:#666;white-space:normal">' + (notes || '-') + '</td>'
+      rows += '</tr>'
     })
+    var headerStyle = 'padding:4px 8px;font-size:10pt;text-align:left;color:#888;border-bottom:2px solid #000'
     var html =
       '<div style="border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:14px">' +
         '<div style="font-size:20pt;font-weight:bold">' + source + '</div>' +
@@ -85,7 +87,17 @@ export default class extends Controller {
         (owner ? '<div style="font-size:14pt;margin-top:2px">Owned By ' + owner + '</div>' : '') +
         '<div style="font-size:13pt;color:#555;margin-top:3px">Due ' + due + '</div>' +
       '</div>' +
-      '<table style="width:100%;border-collapse:collapse">' + rows + '</table>'
+      '<table style="width:100%;border-collapse:collapse">' +
+        '<thead><tr>' +
+          '<th style="' + headerStyle + '">#</th>' +
+          '<th style="' + headerStyle + '">Name</th>' +
+          '<th style="' + headerStyle + '">Type</th>' +
+          '<th style="' + headerStyle + '">Age</th>' +
+          '<th style="' + headerStyle + '">Height</th>' +
+          '<th style="' + headerStyle + '">Notes</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>'
     var padding = this.paddingTopValue + 'px ' + this.paddingRightValue + 'px ' + this.paddingBottomValue + 'px ' + this.paddingLeftValue + 'px'
     var font = "'" + this.fontValue + "', sans-serif"
     var win = window.open('', '_blank', 'width=700,height=1000')
