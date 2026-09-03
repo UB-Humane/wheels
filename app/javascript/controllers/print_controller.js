@@ -8,6 +8,16 @@ const FONTS_URL = "https://fonts.googleapis.com/css2?" +
   "&family=Atkinson+Hyperlegible:wght@400;700" +
   "&display=swap"
 
+// window.onload fires once the Google Fonts stylesheet reference has loaded, not once the
+// actual webfont files have downloaded and swapped in — printing on load risked capturing the
+// page still in its fallback font, reintroducing the very cross-browser metrics mismatch this
+// was meant to fix. document.fonts.ready waits for the real font to actually be applied.
+const PRINT_SCRIPT =
+  '<script>' +
+    'function go(){window.print();window.close();}' +
+    'if (document.fonts && document.fonts.ready) { document.fonts.ready.then(go); } else { window.onload = go; }' +
+  '<\/script>'
+
 export default class extends Controller {
   static targets = [ "printedBadge" ]
   static values = {
@@ -43,7 +53,7 @@ export default class extends Controller {
     })
     var font = "'" + this.fontValue + "', sans-serif"
     var win = window.open('', '_blank', 'width=400,height=600')
-    win.document.write('<html><head><link rel="stylesheet" href="' + FONTS_URL + '"><style>@page { size: 50mm 80mm; margin: 0; }</style></head><body style="font-family:' + font + ';margin:0">' + pages.join('') + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
+    win.document.write('<html><head><link rel="stylesheet" href="' + FONTS_URL + '"><style>@page { size: 50mm 80mm; margin: 0; }</style></head><body style="font-family:' + font + ';margin:0">' + pages.join('') + PRINT_SCRIPT + '</body></html>')
     win.document.close()
     this._markPrinted()
   }
@@ -107,7 +117,7 @@ export default class extends Controller {
     var padding = this.paddingTopValue + 'px ' + this.paddingRightValue + 'px ' + this.paddingBottomValue + 'px ' + this.paddingLeftValue + 'px'
     var font = "'" + this.fontValue + "', sans-serif"
     var win = window.open('', '_blank', 'width=700,height=1000')
-    win.document.write('<html><head><link rel="stylesheet" href="' + FONTS_URL + '"><style>@page { size: A5; margin: 8mm; }</style></head><body style="font-family:' + font + ';padding:' + padding + ';max-width:660px">' + html + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>')
+    win.document.write('<html><head><link rel="stylesheet" href="' + FONTS_URL + '"><style>@page { size: A5; margin: 8mm; }</style></head><body style="font-family:' + font + ';padding:' + padding + ';max-width:660px">' + html + PRINT_SCRIPT + '</body></html>')
     win.document.close()
   }
 }
