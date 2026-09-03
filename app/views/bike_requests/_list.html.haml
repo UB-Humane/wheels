@@ -149,7 +149,7 @@
             = button_to "Mark Distributed", bike_request_path(req), method: :patch, params: { status: "distributed" }, form: form_width,
                 class: primary_btn
           - if production_view && !req.requested? && !req.archived?
-            %button{type: "button", class: secondary_btn, data: { action: "click->print#printLabels" }} Print All
+            %button{type: "button", class: secondary_btn, data: { action: "click->print#printLabels" }} Print Stickers
             %button{type: "button", class: secondary_btn, data: { action: "click->print#printCard" }} Print Overview
 
   - if pagy.pages > 1
