@@ -52,13 +52,13 @@ export default class extends Controller {
       rows.push('<div style="font-size:10pt;line-height:1.25;margin:0.5mm 0">Height: ' + (height || '-') + '</div>')
       rows.push('<div style="font-size:10pt;line-height:1.25;margin:0.5mm 0">Notes: ' + (notes || '-') + '</div>')
       var footer =
-        '<div style="text-align:center">' +
+        '<div style="text-align:center;margin-top:3mm">' +
           '<div style="font-size:13pt;font-weight:bold;line-height:1.1">' + codename + '</div>' +
           '<div style="font-size:11pt;line-height:1.25;margin-top:1mm">' + (i + 1) + '/' + bikes.length + '</div>' +
         '</div>'
       pages.push(
         '<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') +
-          'width:50mm;height:80mm;box-sizing:border-box;padding:3mm 3mm 6mm;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between">' +
+          'width:50mm;height:80mm;box-sizing:border-box;padding:3mm 3mm 6mm;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start">' +
           '<div>' + rows.join('') + '</div>' +
           footer +
         '</div>'
