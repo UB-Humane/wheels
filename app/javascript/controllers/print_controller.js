@@ -53,8 +53,8 @@ export default class extends Controller {
       rows.push('<div style="font-size:10pt;line-height:1.25;margin:0.5mm 0">Notes: ' + (notes || '-') + '</div>')
       var footer =
         '<div style="text-align:center">' +
-          '<div style="font-size:17pt;font-weight:bold;line-height:1.1">' + codename + '</div>' +
-          '<div style="font-size:13pt;line-height:1.25;margin-top:1mm">' + (i + 1) + '/' + bikes.length + '</div>' +
+          '<div style="font-size:13pt;font-weight:bold;line-height:1.1">' + codename + '</div>' +
+          '<div style="font-size:11pt;line-height:1.25;margin-top:1mm">' + (i + 1) + '/' + bikes.length + '</div>' +
         '</div>'
       pages.push(
         '<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') +
