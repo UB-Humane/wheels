@@ -58,7 +58,8 @@ export default class extends Controller {
         '</div>'
       pages.push(
         '<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') +
-          'width:50mm;height:80mm;box-sizing:border-box;padding:3mm 3mm 6mm;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between">' +
+          'width:50mm;height:80mm;box-sizing:border-box;padding:3mm 3mm 6mm;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;' +
+          'break-inside:avoid;page-break-inside:avoid">' +
           '<div>' + rows.join('') + '</div>' +
           footer +
         '</div>'
