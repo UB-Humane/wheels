@@ -46,21 +46,23 @@ export default class extends Controller {
       var name = b[0], type = b[1], age = b[2], height = b[3], notes = b[4]
       var rows = []
       rows.push('<div style="font-size:13pt;font-weight:bold;line-height:1.25;margin-bottom:2mm">' + source + '</div>')
-      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Name: ' + (name || '-') + '</div>')
-      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Sex: ' + (type || '-') + '</div>')
-      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Age: ' + (age || '-') + '</div>')
-      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Height: ' + (height || '-') + '</div>')
-      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0">Notes: ' + (notes || '-') + '</div>')
+      var oneLine = 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis'
+      var twoLines = 'display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis'
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0;' + oneLine + '">Name: ' + (name || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0;' + oneLine + '">Sex: ' + (type || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0;' + oneLine + '">Age: ' + (age || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0;' + oneLine + '">Height: ' + (height || '-') + '</div>')
+      rows.push('<div style="font-size:12pt;line-height:1.25;margin:0.5mm 0;' + oneLine + '">Notes: ' + (notes || '-') + '</div>')
       var footer =
-        '<div style="text-align:center">' +
-          '<div style="font-size:20pt;font-weight:bold;line-height:1.1">' + codename + '</div>' +
+        '<div style="text-align:center;margin-top:4mm;break-inside:avoid;page-break-inside:avoid">' +
+          '<div style="font-size:20pt;font-weight:bold;line-height:1.1;' + twoLines + '">' + codename + '</div>' +
           '<div style="font-size:15pt;line-height:1.25;margin-top:1mm">' + (i + 1) + '/' + bikes.length + '</div>' +
         '</div>'
       pages.push(
         '<div style="' + (pages.length > 0 ? 'page-break-before:always;' : '') +
-          'width:50mm;height:80mm;box-sizing:border-box;padding:3mm 3mm 6mm;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;' +
+          'width:50mm;box-sizing:border-box;padding:3mm 3mm 6mm;' +
           'break-inside:avoid;page-break-inside:avoid">' +
-          '<div>' + rows.join('') + '</div>' +
+          '<div style="break-inside:avoid;page-break-inside:avoid">' + rows.join('') + '</div>' +
           footer +
         '</div>'
       )
