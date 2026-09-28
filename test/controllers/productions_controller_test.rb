@@ -132,18 +132,20 @@ class ProductionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "ready_for_delivery", assigns(:tab)
   end
 
-  test "delivery shows PRINTED badge and green border for a printed request" do
+  test "delivery shows a PRINTED toggle button and green border for a printed request" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     bike_requests(:completed_bike).update!(printed: true)
     get delivery_production_path(productions(:main_production))
-    assert_select "p:not([hidden])", text: "PRINTED"
+    assert_select "button[title=?]", "Mark Not Printed", text: "PRINTED"
+    assert_select "button", text: "NOT PRINTED", count: 0
     assert_select "div.border-green-600"
   end
 
-  test "delivery hides PRINTED badge for an unprinted request" do
+  test "delivery shows a NOT PRINTED toggle button for an unprinted request" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     get delivery_production_path(productions(:main_production))
-    assert_select "p[hidden]", text: "PRINTED"
+    assert_select "button[title=?]", "Mark Printed", text: "NOT PRINTED"
+    assert_select "button", text: "PRINTED", count: 0
     assert_select "div.border-green-600", count: 0
   end
 

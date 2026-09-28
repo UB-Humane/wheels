@@ -681,15 +681,24 @@ class BikeRequestsControllerTest < ActionDispatch::IntegrationTest
   test "mark_printed allows a plain volunteer" do
     post login_path, params: { email: users(:prod_volunteer).email, password: "password" }
     patch mark_printed_bike_request_path(bike_requests(:completed_bike))
-    assert_response :success
+    assert_redirected_to delivery_production_path(productions(:main_production), tab: "ready_for_delivery")
     assert bike_requests(:completed_bike).reload.printed?
   end
 
   test "mark_printed allows a production admin" do
     post login_path, params: { email: users(:prod_admin).email, password: "password" }
     patch mark_printed_bike_request_path(bike_requests(:completed_bike))
-    assert_response :success
+    assert_redirected_to delivery_production_path(productions(:main_production), tab: "ready_for_delivery")
     assert bike_requests(:completed_bike).reload.printed?
+  end
+
+  test "mark_printed with printed=false unmarks a printed request" do
+    br = bike_requests(:completed_bike)
+    br.update!(printed: true)
+    post login_path, params: { email: users(:prod_admin).email, password: "password" }
+    patch mark_printed_bike_request_path(br), params: { printed: false }
+    assert_redirected_to delivery_production_path(productions(:main_production), tab: "ready_for_delivery")
+    assert_not br.reload.printed?
   end
 
   # --- update: distribution resubmit ---

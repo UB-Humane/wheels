@@ -25,8 +25,7 @@
                 "print-padding-right-value":  req.production.print_padding_right,
                 "print-padding-bottom-value": req.production.print_padding_bottom,
                 "print-padding-left-value":   req.production.print_padding_left,
-                "print-font-value":           req.production.print_font_family,
-                "print-mark-printed-url-value": mark_printed_bike_request_path(req) }}
+                "print-font-value":           req.production.print_font_family }}
         .flex.flex-col.sm:flex-row.sm:items-start.sm:justify-between.gap-3.sm:gap-4
           .space-y-1
             .flex.flex-wrap.items-baseline.gap-2
@@ -52,7 +51,23 @@
                 %p.text-lg.text-red-600= req.denial_reason
             .flex.flex-wrap.items-center.gap-4
               %p.text-lg.font-bold.text-red-600{ hidden: !req.overdue? } OVERDUE
-              %p.text-lg.font-bold.text-green-700{ hidden: !req.printed?, data: { "print-target": "printedBadge" } } PRINTED
+              - if req.printed?
+                - if production_view
+                  = button_to mark_printed_bike_request_path(req), method: :patch, params: { printed: false }, class: "flex items-center gap-1 text-lg font-bold text-green-700 bg-transparent border-0 cursor-pointer p-0", title: "Mark Not Printed", form: { style: "display:inline" } do
+                    PRINTED
+                    %svg{xmlns: "http://www.w3.org/2000/svg", width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": "2", "stroke-linecap": "round", "stroke-linejoin": "round"}
+                      %polyline{points: "23 4 23 10 17 10"}
+                      %polyline{points: "1 20 1 14 7 14"}
+                      %path{d: "M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"}
+                - else
+                  %p.text-lg.font-bold.text-green-700 PRINTED
+              - elsif production_view && !req.requested? && !req.archived?
+                = button_to mark_printed_bike_request_path(req), method: :patch, class: "flex items-center gap-1 text-lg font-bold text-gray-500 bg-transparent border-0 cursor-pointer p-0", title: "Mark Printed", form: { style: "display:inline" } do
+                  NOT PRINTED
+                  %svg{xmlns: "http://www.w3.org/2000/svg", width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": "2", "stroke-linecap": "round", "stroke-linejoin": "round"}
+                    %polyline{points: "23 4 23 10 17 10"}
+                    %polyline{points: "1 20 1 14 7 14"}
+                    %path{d: "M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"}
               %p.text-lg.font-medium.text-gray-900 Due #{req.due_date.strftime("%-m/%-d/%Y")}
               - if production_view && !req.archived?
                 = button_to bike_request_path(req), method: :patch, params: { status: "archive" }, class: "p-1 text-gray-400 hover:text-gray-700 bg-transparent border-0 cursor-pointer", title: "Archive", form: { style: "display:inline" } do

@@ -51,8 +51,8 @@ class BikeRequestsController < ApplicationController
 
   def mark_printed
     return render plain: "Access denied", status: :forbidden unless authorized_for_production?
-    @bike_request.update!(printed: true)
-    head :ok
+    @bike_request.update!(printed: params[:printed] != "false")
+    redirect_to production_tab_path(@bike_request.production, @bike_request.status)
   end
 
   def update
